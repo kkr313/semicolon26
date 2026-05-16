@@ -1,0 +1,29 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Archives
+*.zip
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Demo docs (large test files — not needed in prod image)
+db/demo doc/
+
+# Local DB state (created fresh at runtime)
+db/auth/
+db/feedback/
+db/user_data/

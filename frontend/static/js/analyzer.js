@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModeToggle();
     checkLLMStatus();
     loadModels();
+    wireUpEventListeners();
 });
 
 /* ---- Mode Toggle ---- */
@@ -1927,4 +1928,99 @@ function filterComparisonTable(filter) {
     });
 }
 
+/* ═══ CSP-SAFE EVENT LISTENER WIRING ═══ */
+function wireUpEventListeners() {
+    // Theme toggle
+    const themeBtn = document.querySelector('.theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+    // Logout
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener('mouseover', function() { this.style.color = 'var(--clinical-red)'; });
+        logoutBtn.addEventListener('mouseout', function() { this.style.color = 'var(--text-muted)'; });
+    }
+
+    // Guide toggle
+    const guideBtn = document.getElementById('btn-guide-toggle');
+    if (guideBtn) guideBtn.addEventListener('click', function() {
+        document.getElementById('guide-content').classList.toggle('hidden');
+        this.querySelector('.guide-chevron').classList.toggle('rotate-180');
+    });
+
+    // Analysis mode tabs
+    const tabSingle = document.getElementById('tab-single');
+    const tabMulti = document.getElementById('tab-multi');
+    if (tabSingle) tabSingle.addEventListener('click', () => switchAnalysisTab('single'));
+    if (tabMulti) tabMulti.addEventListener('click', () => switchAnalysisTab('multi'));
+
+    // Run analysis button
+    const runBtn = document.getElementById('btn-run-analysis');
+    if (runBtn) runBtn.addEventListener('click', runAnalysis);
+
+    // Multi-doc buttons
+    const clearBtn = document.getElementById('btn-clear-multi');
+    if (clearBtn) clearBtn.addEventListener('click', clearMultiFiles);
+    const compareBtn = document.getElementById('btn-run-compare');
+    if (compareBtn) compareBtn.addEventListener('click', runMultiDocCompare);
+
+    // Cancel analysis
+    const cancelBtn = document.getElementById('cancel-analysis-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', cancelAnalysis);
+
+    // Analyze another
+    const analyzeAnotherBtn = document.getElementById('btn-analyze-another');
+    if (analyzeAnotherBtn) analyzeAnotherBtn.addEventListener('click', () => {
+        document.getElementById('results-section').classList.add('hidden');
+        document.getElementById('upload-section').classList.remove('hidden');
+    });
+
+    // Single-doc download buttons
+    const dlPdf = document.getElementById('btn-download-pdf');
+    if (dlPdf) dlPdf.addEventListener('click', () => downloadReport('pdf'));
+    const dlJson = document.getElementById('btn-download-json');
+    if (dlJson) dlJson.addEventListener('click', () => downloadReport('json'));
+
+    // Single-doc feedback
+    const btnPos = document.getElementById('btn-positive');
+    if (btnPos) btnPos.addEventListener('click', () => selectRating('positive'));
+    const btnNeg = document.getElementById('btn-negative');
+    if (btnNeg) btnNeg.addEventListener('click', () => selectRating('negative'));
+    const btnFeedback = document.getElementById('btn-submit-feedback');
+    if (btnFeedback) btnFeedback.addEventListener('click', submitFeedback);
+
+    // Cross-doc: back to upload
+    const backBtn = document.getElementById('btn-back-to-upload');
+    if (backBtn) backBtn.addEventListener('click', backToUpload);
+
+    // Cross-doc download buttons
+    const xdlPdf = document.getElementById('btn-xdoc-download-pdf');
+    if (xdlPdf) xdlPdf.addEventListener('click', () => downloadCrossDocReport('pdf'));
+    const xdlJson = document.getElementById('btn-xdoc-download-json');
+    if (xdlJson) xdlJson.addEventListener('click', () => downloadCrossDocReport('json'));
+
+    // Cross-doc feedback
+    const xPos = document.getElementById('xdoc-btn-positive');
+    if (xPos) xPos.addEventListener('click', () => selectRating('positive'));
+    const xNeg = document.getElementById('xdoc-btn-negative');
+    if (xNeg) xNeg.addEventListener('click', () => selectRating('negative'));
+    const xFeedback = document.getElementById('btn-xdoc-submit-feedback');
+    if (xFeedback) xFeedback.addEventListener('click', submitFeedback);
+
+    // Table filter buttons
+    document.querySelectorAll('.table-filter-btn[data-table-filter]').forEach(btn => {
+        btn.addEventListener('click', () => filterComparisonTable(btn.dataset.tableFilter));
+    });
+
+    // Doc detail modal: backdrop click + close button
+    const ddModal = document.getElementById('doc-detail-modal');
+    if (ddModal) ddModal.addEventListener('click', function(e) { if (e.target === this) closeDocDetailModal(); });
+    const ddClose = document.getElementById('btn-close-doc-detail');
+    if (ddClose) ddClose.addEventListener('click', closeDocDetailModal);
+
+    // Validation modal close
+    const valClose = document.getElementById('btn-close-validation');
+    if (valClose) valClose.addEventListener('click', closeValidationModal);
+}
 

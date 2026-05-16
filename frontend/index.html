@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Clinical Document Analyzer</title>
     <script src="/static/js/theme.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind.min.js"></script>
+    <script src="/static/js/tailwind-config.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
-    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'] } } } }</script>
 </head>
 <body class="font-sans min-h-screen overflow-x-hidden" style="background:var(--bg-primary);color:var(--text-primary);">
 
@@ -32,11 +32,11 @@
                 <a href="#problem" class="hover:opacity-80 transition">The Problem</a>
                 <a href="#solution" class="hover:opacity-80 transition">Our Solution</a>
                 <a href="#how-it-works" class="hover:opacity-80 transition">How It Works</a>
-                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle theme">
+                <button class="theme-toggle" title="Toggle theme">
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
                 </button>
-                <button onclick="openAuthModal()" class="px-5 py-2 rounded-lg text-white font-semibold text-sm hover:opacity-90 transition-all" style="background:var(--gradient-primary);">Sign In</button>
+                <button data-action="open-auth" class="px-5 py-2 rounded-lg text-white font-semibold text-sm hover:opacity-90 transition-all" style="background:var(--gradient-primary);">Sign In</button>
             </div>
         </nav>
 
@@ -56,7 +56,7 @@
                     — missing critical risks, inconsistencies, and compliance gaps. <span style="color:var(--text-accent);font-weight:500;">ClinDoc AI fixes this.</span>
                 </p>
                 <div class="flex flex-wrap justify-center gap-4 mb-6">
-                    <button onclick="openAuthModal()" class="px-8 py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-all hover:scale-105" style="background:var(--gradient-primary);box-shadow:0 8px 24px rgba(13,148,136,0.25);">
+                    <button data-action="open-auth" class="px-8 py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-all hover:scale-105" style="background:var(--gradient-primary);box-shadow:0 8px 24px rgba(13,148,136,0.25);">
                         Get Started →
                     </button>
                     <a href="#problem" class="px-8 py-3.5 rounded-xl font-semibold text-sm transition-all border" style="background:var(--bg-card);border-color:var(--border-card);color:var(--text-secondary);">
@@ -270,7 +270,7 @@
         <section class="max-w-3xl mx-auto px-6 pb-20 text-center">
             <h2 class="text-3xl md:text-4xl font-bold mb-4" style="color:var(--text-heading);">Ready to Analyze<br><span style="background:var(--gradient-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Your Documents?</span></h2>
             <p class="max-w-xl mx-auto mb-8" style="color:var(--text-secondary);">Sign in and upload your clinical trial document — get AI-powered insights in minutes.</p>
-            <button onclick="openAuthModal()" class="px-10 py-4 rounded-xl text-white font-semibold hover:opacity-90 transition-all hover:scale-105" style="background:var(--gradient-primary);box-shadow:0 8px 24px rgba(13,148,136,0.25);">
+            <button data-action="open-auth" class="px-10 py-4 rounded-xl text-white font-semibold hover:opacity-90 transition-all hover:scale-105" style="background:var(--gradient-primary);box-shadow:0 8px 24px rgba(13,148,136,0.25);">
                 Get Started →
             </button>
         </section>
@@ -287,24 +287,24 @@
     <!-- ═══ AUTH MODAL ═══ -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden">
         <!-- Backdrop -->
-        <div onclick="closeAuthModal()" class="absolute inset-0 backdrop-blur-sm" style="background:var(--overlay-bg);"></div>
+        <div id="auth-backdrop" class="absolute inset-0 backdrop-blur-sm" style="background:var(--overlay-bg);"></div>
         <!-- Dialog -->
         <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
             <div class="rounded-3xl p-8 w-full max-w-md animate-slide-up border" style="background:var(--bg-modal);border-color:var(--border-card);box-shadow:var(--shadow-lg);">
                 <!-- Close Button -->
-                <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg transition text-lg" style="background:var(--bg-input);color:var(--text-muted);">&times;</button>
+                <button id="auth-close-btn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg transition text-lg" style="background:var(--bg-input);color:var(--text-muted);">&times;</button>
 
                 <h2 class="text-2xl font-bold text-center mb-2" style="color:var(--text-heading);">Welcome Back</h2>
                 <p class="text-sm text-center mb-6" style="color:var(--text-secondary);">Sign in or create an account</p>
 
                 <!-- Tab Toggle -->
                 <div class="flex rounded-xl p-1 mb-6" style="background:var(--bg-input);">
-                    <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all" style="background:var(--bg-accent-soft);color:var(--text-heading);">Sign In</button>
-                    <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all" style="color:var(--text-muted);">Register</button>
+                    <button id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all" style="background:var(--bg-accent-soft);color:var(--text-heading);">Sign In</button>
+                    <button id="tab-register" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all" style="color:var(--text-muted);">Register</button>
                 </div>
 
                 <!-- Login Form -->
-                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <form id="login-form" class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium mb-1.5" style="color:var(--text-secondary);">Email</label>
                         <input type="email" name="email" required placeholder="you@organization.com"
@@ -322,7 +322,7 @@
                 </form>
 
                 <!-- Register Form -->
-                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <form id="register-form" class="space-y-4 hidden">
                     <div>
                         <label class="block text-xs font-medium mb-1.5" style="color:var(--text-secondary);">Full Name</label>
                         <input type="text" name="name" required placeholder="Dr. Jane Smith"
@@ -350,7 +350,7 @@
                 <div id="quick-login" class="mt-6 p-4 rounded-xl border" style="background:var(--bg-card);border-color:var(--border-card);">
                     <p class="text-xs mb-3 text-center" style="color:var(--text-muted);">Quick sign in</p>
                     <div class="flex gap-2">
-                        <button type="button" onclick="fillLogin('demo@optum.com','demo123')" class="flex-1 py-2.5 px-3 border rounded-lg text-xs transition-all text-center" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                        <button type="button" id="btn-test-account" class="flex-1 py-2.5 px-3 border rounded-lg text-xs transition-all text-center" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                             🔬 Test Account
                         </button>
                     </div>
@@ -360,44 +360,5 @@
     </div>
 
     <script src="/static/js/auth.js"></script>
-    <script>
-        function openAuthModal() {
-            document.getElementById('auth-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeAuthModal();
-        });
-        function fillLogin(email, pwd) {
-            switchTab('login');
-            const form = document.getElementById('login-form');
-            form.querySelector('input[name="email"]').value = email;
-            form.querySelector('input[name="password"]').value = pwd;
-        }
-        const _origSwitchTab = switchTab;
-        switchTab = function(tab) {
-            _origSwitchTab(tab);
-            const ql = document.getElementById('quick-login');
-            if (ql) ql.classList.toggle('hidden', tab === 'register');
-            // Update tab styles for theme
-            const loginTab = document.getElementById('tab-login');
-            const regTab = document.getElementById('tab-register');
-            if (tab === 'login') {
-                loginTab.style.background = 'var(--bg-accent-soft)';
-                loginTab.style.color = 'var(--text-heading)';
-                regTab.style.background = 'transparent';
-                regTab.style.color = 'var(--text-muted)';
-            } else {
-                regTab.style.background = 'var(--bg-accent-soft)';
-                regTab.style.color = 'var(--text-heading)';
-                loginTab.style.background = 'transparent';
-                loginTab.style.color = 'var(--text-muted)';
-            }
-        };
-    </script>
 </body>
 </html>

@@ -9,6 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('user-name').textContent = user.name || user.email;
     document.getElementById('greeting').textContent = 'Welcome, ' + (user.name || user.email);
     loadUserData();
+
+    // CSP-safe event listeners
+    const themeBtn = document.querySelector('.theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener('mouseover', function() { this.style.color = 'var(--clinical-red)'; });
+        logoutBtn.addEventListener('mouseout', function() { this.style.color = 'var(--text-muted)'; });
+    }
 });
 
 function handleLogout() {

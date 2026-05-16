@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dashboard — ClinDoc AI</title>
     <script src="/static/js/theme.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="/static/js/tailwind.min.js"></script>
+    <script src="/static/js/tailwind-config.js"></script>
+    <script src="/static/js/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
-    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'] } } } }</script>
 </head>
 <body class="font-sans min-h-screen" style="background:var(--bg-primary);color:var(--text-primary);">
 
@@ -25,12 +25,12 @@
                     <a href="/analyzer" class="px-4 py-1.5 text-xs font-semibold rounded-md transition" style="color:var(--text-muted);">Analyzer</a>
                     <a href="/dashboard" class="px-4 py-1.5 text-xs font-semibold rounded-md" style="background:var(--bg-accent-soft);color:var(--text-heading);">My Dashboard</a>
                 </nav>
-                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle theme">
+                <button class="theme-toggle" title="Toggle theme">
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
                 </button>
                 <span id="user-name" class="text-sm" style="color:var(--text-secondary);"></span>
-                <button onclick="handleLogout()" class="text-xs transition px-3 py-1.5 rounded-lg" style="color:var(--text-muted);" onmouseover="this.style.color='var(--clinical-red)'" onmouseout="this.style.color='var(--text-muted)'">Logout</button>
+                <button id="btn-logout" class="text-xs transition px-3 py-1.5 rounded-lg" style="color:var(--text-muted);">Logout</button>
             </div>
         </div>
     </header>

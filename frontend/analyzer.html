@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyzer — ClinDoc AI</title>
     <script src="/static/js/theme.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="/static/js/tailwind.min.js"></script>
+    <script src="/static/js/tailwind-config.js"></script>
+    <script src="/static/js/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
-    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'] } } } }</script>
 </head>
 <body class="font-sans min-h-screen" style="background:var(--bg-primary);color:var(--text-primary);">
 
@@ -25,12 +25,12 @@
                     <a href="/analyzer" class="px-4 py-1.5 text-xs font-semibold rounded-md" style="background:var(--bg-accent-soft);color:var(--text-heading);">Analyzer</a>
                     <a href="/dashboard" class="px-4 py-1.5 text-xs font-semibold rounded-md transition" style="color:var(--text-muted);">My Dashboard</a>
                 </nav>
-                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle theme">
+                <button class="theme-toggle" title="Toggle theme">
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
                 </button>
                 <span id="user-name" class="text-sm" style="color:var(--text-secondary);"></span>
-                <button onclick="handleLogout()" class="text-xs transition px-3 py-1.5 rounded-lg" style="color:var(--text-muted);" onmouseover="this.style.color='var(--clinical-red)'" onmouseout="this.style.color='var(--text-muted)'">Logout</button>
+                <button id="btn-logout" class="text-xs transition px-3 py-1.5 rounded-lg" style="color:var(--text-muted);">Logout</button>
             </div>
         </div>
     </header>
@@ -44,7 +44,7 @@
 
             <!-- How It Works Guide -->
             <div class="rounded-2xl border p-5 mb-6" style="background:color-mix(in srgb, var(--clinical-teal) 4%, var(--bg-card));border-color:color-mix(in srgb, var(--clinical-teal) 25%, var(--border-card));">
-                <button onclick="document.getElementById('guide-content').classList.toggle('hidden');this.querySelector('.guide-chevron').classList.toggle('rotate-180')" class="w-full flex items-center justify-between">
+                <button id="btn-guide-toggle" class="w-full flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
                         <span class="text-lg">💡</span>
                         <span class="text-sm font-semibold" style="color:var(--text-heading);">How It Works — AI Pipeline Guide</span>
@@ -126,10 +126,10 @@
 
                 <!-- Analysis Mode Tabs -->
                 <div class="flex items-center gap-1 mb-6 p-1 rounded-xl" style="background:var(--bg-input);">
-                    <button id="tab-single" onclick="switchAnalysisTab('single')" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="background:var(--bg-accent-soft);color:var(--text-heading);">
+                    <button id="tab-single" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="background:var(--bg-accent-soft);color:var(--text-heading);">
                         📄 Single Document
                     </button>
-                    <button id="tab-multi" onclick="switchAnalysisTab('multi')" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="color:var(--text-muted);">
+                    <button id="tab-multi" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="color:var(--text-muted);">
                         📑 Multi-Doc Compare
                     </button>
                 </div>
@@ -153,7 +153,7 @@
                             <p id="file-size" class="text-xs" style="color:var(--text-muted);"></p>
                         </div>
                     </div>
-                    <button onclick="runAnalysis()" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">
+                    <button id="btn-run-analysis" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">
                         Run Analysis →
                     </button>
                 </div>
@@ -176,10 +176,10 @@
                     <div id="multi-action" class="hidden mt-4 flex items-center justify-between">
                         <span id="multi-file-count" class="text-xs font-semibold" style="color:var(--text-muted);"></span>
                         <div class="flex gap-3">
-                            <button onclick="clearMultiFiles()" class="px-4 py-2 text-xs font-semibold rounded-xl border transition hover:opacity-80" style="border-color:var(--border-input);color:var(--text-muted);">
+                            <button id="btn-clear-multi" class="px-4 py-2 text-xs font-semibold rounded-xl border transition hover:opacity-80" style="border-color:var(--border-input);color:var(--text-muted);">
                                 Clear All
                             </button>
-                            <button onclick="runMultiDocCompare()" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+                            <button id="btn-run-compare" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 4px 12px rgba(99,102,241,0.3);">
                                 Compare Documents →
                             </button>
                         </div>
@@ -279,7 +279,7 @@
 
                 <!-- Stop Analysis -->
                 <div class="mt-5 flex justify-center">
-                    <button id="cancel-analysis-btn" onclick="cancelAnalysis()" class="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold animate-pulse" style="background:rgba(239,68,68,0.15);color:var(--clinical-red);border:1.5px solid rgba(239,68,68,0.4);box-shadow:0 0 12px rgba(239,68,68,0.15);">
+                    <button id="cancel-analysis-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold animate-pulse" style="background:rgba(239,68,68,0.15);color:var(--clinical-red);border:1.5px solid rgba(239,68,68,0.4);box-shadow:0 0 12px rgba(239,68,68,0.15);">
                         <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
                         Stop Analysis
                     </button>
@@ -296,7 +296,7 @@
                     <h1 class="text-2xl font-bold" style="color:var(--text-heading);">Analysis Results</h1>
                     <p id="result-filename" class="text-sm mt-0.5" style="color:var(--text-muted);"></p>
                 </div>
-                <button onclick="document.getElementById('results-section').classList.add('hidden');document.getElementById('upload-section').classList.remove('hidden');" class="flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                <button id="btn-analyze-another" class="flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     Analyze Another
                 </button>
@@ -455,11 +455,11 @@
                         <h2 class="text-base font-bold" style="color:var(--text-heading);">Export Report</h2>
                     </div>
                     <div class="flex gap-3">
-                        <button onclick="downloadReport('pdf')" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                        <button id="btn-download-pdf" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                             <svg class="w-4 h-4" style="color:var(--clinical-red);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                             PDF Report
                         </button>
-                        <button onclick="downloadReport('json')" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                        <button id="btn-download-json" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                             <svg class="w-4 h-4" style="color:var(--clinical-blue);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                             JSON Data
                         </button>
@@ -476,17 +476,17 @@
                     <h2 class="text-base font-bold" style="color:var(--text-heading);">Was this analysis helpful?</h2>
                 </div>
                 <div class="flex gap-3 mb-4">
-                    <button onclick="selectRating('positive')" id="btn-positive" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
+                    <button id="btn-positive" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
                         <svg class="w-5 h-5 inline-block mr-1 -mt-0.5" style="color:var(--clinical-green);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
                         Accurate
                     </button>
-                    <button onclick="selectRating('negative')" id="btn-negative" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
+                    <button id="btn-negative" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
                         <svg class="w-5 h-5 inline-block mr-1 -mt-0.5" style="color:var(--clinical-red);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
                         Needs Work
                     </button>
                 </div>
                 <textarea id="feedback-comment" placeholder="Any comments or suggestions..." class="w-full px-4 py-3 rounded-xl text-sm resize-none h-20 transition th-input focus:outline-none"></textarea>
-                <button onclick="submitFeedback()" class="mt-3 px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">Submit Feedback</button>
+                <button id="btn-submit-feedback" class="mt-3 px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">Submit Feedback</button>
                 <div id="feedback-msg" class="hidden mt-2 text-sm" style="color:var(--clinical-green);"></div>
             </div>
 
@@ -501,7 +501,7 @@
                     <h1 class="text-2xl font-bold" style="color:var(--text-heading);">Cross-Document Comparison</h1>
                     <p id="xdoc-subtitle" class="text-sm mt-0.5" style="color:var(--text-muted);">Multi-document consistency analysis</p>
                 </div>
-                <button onclick="backToUpload()" class="flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                <button id="btn-back-to-upload" class="flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     Compare More
                 </button>
@@ -643,8 +643,8 @@
                         <span id="xdoc-table-count" class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:rgba(99,102,241,0.12);color:#6366f1;">0 fields</span>
                     </div>
                     <div id="xdoc-table-filter" class="flex gap-1 p-1 rounded-lg" style="background:var(--bg-input);">
-                        <button onclick="filterComparisonTable('all')" data-table-filter="all" class="table-filter-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all" style="background:var(--bg-card);color:var(--text-heading);box-shadow:var(--shadow-card);">All Fields</button>
-                        <button onclick="filterComparisonTable('issues')" data-table-filter="issues" class="table-filter-btn flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all" style="color:var(--text-muted);"><span class="w-2 h-2 rounded-full" style="background:var(--clinical-red);"></span>Issues Only</button>
+                        <button data-table-filter="all" class="table-filter-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-all" style="background:var(--bg-card);color:var(--text-heading);box-shadow:var(--shadow-card);">All Fields</button>
+                        <button data-table-filter="issues" class="table-filter-btn flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all" style="color:var(--text-muted);"><span class="w-2 h-2 rounded-full" style="background:var(--clinical-red);"></span>Issues Only</button>
                     </div>
                 </div>
                 <div id="xdoc-fields-table" class="overflow-x-auto"></div>
@@ -690,11 +690,11 @@
                         <h2 class="text-base font-bold" style="color:var(--text-heading);">Export Report</h2>
                     </div>
                     <div class="flex gap-3">
-                        <button onclick="downloadCrossDocReport('pdf')" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                        <button id="btn-xdoc-download-pdf" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                             <svg class="w-4 h-4" style="color:var(--clinical-red);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                             PDF Report
                         </button>
-                        <button onclick="downloadCrossDocReport('json')" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
+                        <button id="btn-xdoc-download-json" class="flex items-center gap-2 px-5 py-2.5 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md" style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-secondary);">
                             <svg class="w-4 h-4" style="color:var(--clinical-blue);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                             JSON Data
                         </button>
@@ -711,17 +711,17 @@
                     <h2 class="text-base font-bold" style="color:var(--text-heading);">Was this comparison helpful?</h2>
                 </div>
                 <div class="flex gap-3 mb-4">
-                    <button onclick="selectRating('positive')" id="xdoc-btn-positive" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
+                    <button id="xdoc-btn-positive" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
                         <svg class="w-5 h-5 inline-block mr-1 -mt-0.5" style="color:var(--clinical-green);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
                         Accurate
                     </button>
-                    <button onclick="selectRating('negative')" id="xdoc-btn-negative" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
+                    <button id="xdoc-btn-negative" class="flex-1 py-3 border rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5" style="border-color:var(--border-input);background:var(--bg-input);color:var(--text-secondary);">
                         <svg class="w-5 h-5 inline-block mr-1 -mt-0.5" style="color:var(--clinical-red);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
                         Needs Work
                     </button>
                 </div>
                 <textarea id="xdoc-feedback-comment" placeholder="Any comments or suggestions..." class="w-full px-4 py-3 rounded-xl text-sm resize-none h-20 transition th-input focus:outline-none"></textarea>
-                <button onclick="submitFeedback()" class="mt-3 px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">Submit Feedback</button>
+                <button id="btn-xdoc-submit-feedback" class="mt-3 px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">Submit Feedback</button>
                 <div id="xdoc-feedback-msg" class="hidden mt-2 text-sm" style="color:var(--clinical-green);"></div>
             </div>
 
@@ -730,7 +730,7 @@
     </div>
 
     <!-- Per-Document Detail Modal -->
-    <div id="doc-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);" onclick="if(event.target===this)closeDocDetailModal()">
+    <div id="doc-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
         <div class="rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto custom-scrollbar" style="background:var(--bg-card);border:1px solid var(--border-card);">
             <!-- Modal Header -->
             <div class="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 border-b" style="background:var(--bg-card);border-color:var(--border-card);">
@@ -741,7 +741,7 @@
                         <span id="ddm-doctype" class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(99,102,241,0.1);color:#6366f1;"></span>
                     </div>
                 </div>
-                <button onclick="closeDocDetailModal()" class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-70 transition" style="background:var(--bg-input);">
+                <button id="btn-close-doc-detail" class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-70 transition" style="background:var(--bg-input);">
                     <svg class="w-4 h-4" style="color:var(--text-muted);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -797,7 +797,7 @@
             <div class="w-20 h-20 mx-auto mb-5 rounded-full flex items-center justify-center text-4xl" style="background:rgba(239,68,68,0.12);">&#9888;</div>
             <h3 class="text-xl font-bold mb-3" style="color:var(--text-heading);">Document Validation Failed</h3>
             <p id="validation-modal-msg" class="text-base leading-relaxed mb-8 font-medium" style="color:var(--text-heading);opacity:0.85;"></p>
-            <button onclick="closeValidationModal()" class="px-10 py-3 text-white text-sm font-bold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 14px rgba(13,148,136,0.3);">Try Again</button>
+            <button id="btn-close-validation" class="px-10 py-3 text-white text-sm font-bold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 14px rgba(13,148,136,0.3);">Try Again</button>
         </div>
     </div>
 

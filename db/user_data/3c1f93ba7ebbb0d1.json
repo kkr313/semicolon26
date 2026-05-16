@@ -1,18 +1,7 @@
 {
   "user_id": "3c1f93ba7ebbb0d1",
-  "total_analyses": 34,
+  "total_analyses": 35,
   "history": [
-    {
-      "filename": "negative_informed_consent_ich_gcp_4_8_invalid.txt",
-      "analyzed_at": "2026-05-16T17:40:53.313809",
-      "doc_type": "clinical_document",
-      "quality_score": 35.5,
-      "quality_grade": "D",
-      "findings_count": 14,
-      "compliance_pct": 33,
-      "demo_mode": true,
-      "chunks": 1
-    },
     {
       "filename": "negative_protocol_ich_m11_invalid.txt",
       "analyzed_at": "2026-05-16T17:51:22.351849",
@@ -56,6 +45,17 @@
       "compliance_pct": 33,
       "demo_mode": true,
       "chunks": 1
+    },
+    {
+      "filename": "informed_consent_ich_gcp_4_8_positive.txt",
+      "analyzed_at": "2026-05-16T20:53:18.171472",
+      "doc_type": "consent_form",
+      "quality_score": 55.7,
+      "quality_grade": "C",
+      "findings_count": 15,
+      "compliance_pct": 76,
+      "demo_mode": true,
+      "chunks": 2
     }
   ],
   "feedback": [
@@ -94,6 +94,12 @@
       "rating": "negative",
       "comment": "not ok, please review more.",
       "submitted_at": "2026-05-16T17:31:05.678102"
+    },
+    {
+      "filename": "csr_ICH_E3_aligned.txt, informed_consent_ich_gcp_4_8_positive.txt, protocol_ich_m11_positive.txt",
+      "rating": "positive",
+      "comment": "testing...",
+      "submitted_at": "2026-05-16T20:54:10.906873"
     }
   ]
 }
