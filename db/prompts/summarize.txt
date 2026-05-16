@@ -1,0 +1,53 @@
+Summarize this clinical document section using the following structure.
+
+**Study Overview**:
+- Title
+- Phase
+- Sponsor
+- Therapeutic area
+
+**Objectives**:
+- Primary objectives
+- Secondary objectives
+
+**Study Design**:
+- Study design type
+- Treatment arms
+- Randomization
+- Blinding
+
+**Patient Population**:
+- Target population
+- Key inclusion/exclusion criteria
+- Sample size
+
+**Endpoints**:
+- Primary endpoints
+- Secondary endpoints
+- Exploratory endpoints
+
+**Key Findings**:
+- Efficacy results
+- Statistical significance (if available)
+
+**Safety Profile**:
+- Adverse events (AEs)
+- Serious adverse events (SAEs)
+- Discontinuations
+
+**Critical Observations**:
+- Potential concerns or risks
+- Missing or unclear details
+- Important limitations or context
+
+RULES:
+- Only include explicitly stated information from THIS section
+- Do NOT assume missing context
+- Write "Not available in this section." if information is missing
+- Use short bullet points (max 3–5 per section)
+- Keep total output under 600 words
+- Ensure consistency with extracted data
+- Focus on clarity, precision, and relevance
+
+Document section:
+{chunk}

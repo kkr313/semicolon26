@@ -1,0 +1,455 @@
+"""
+LLM Analyzer — Communicates with an OpenAI-compatible gateway to perform:
+1. Clinical document summarization
+2. Entity extraction (drugs, endpoints, criteria, AEs)
+3. Consistency / risk checking
+"""
+
+import hashlib
+import json
+import os
+import re
+from pathlib import Path
+
+from openai import OpenAI
+
+from backend.config import LLM_GATEWAY_URL, LLM_API_KEY, LLM_MODEL, PROMPTS_DIR
+
+GATEWAY_URL = LLM_GATEWAY_URL
+API_KEY = LLM_API_KEY
+
+AVAILABLE_MODELS = [
+    "gpt-4.1",
+    "gpt-4.1-nano",
+    "o3-mini",
+    "gpt-4o",
+    "anthropic.claude-sonnet-4",
+    "gpt-5.1-CIO",
+    "gpt-5.2-CIO",
+    "amazon.nova-micro-v1:0",
+    "gemini-2.5-flash-lite",
+    "amazon.nova-2-lite-v1:0",
+    "amazon.nova-lite-v1:0",
+]
+
+DEFAULT_MODEL = LLM_MODEL
+
+# Initialise the OpenAI client pointing at the gateway
+_client = OpenAI(base_url=GATEWAY_URL, api_key=API_KEY)
+
+# ── Token Tracking ─────────────────────────────────────────────────────────
+
+_token_usage = {
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0,
+    "total_tokens": 0,
+    "calls": 0,
+    "models_used": [],       # Track every model that actually responded
+    "fallback_count": 0,     # How many times a fallback model was used
+    "cache_hits": 0,
+}
+
+# ── LLM Response Cache ─────────────────────────────────────────────────────
+# Caches responses keyed by hash(model + prompt) to avoid re-calling LLM
+# on the same document. Cleared on each new analysis run via reset_token_usage().
+_response_cache: dict[str, str] = {}
+
+
+def _cache_key(prompt: str, model: str) -> str:
+    return hashlib.sha256(f"{model}:{prompt}".encode()).hexdigest()
+
+
+def get_token_usage() -> dict:
+    """Return accumulated token usage stats with model tracking."""
+    models = _token_usage.get("models_used", [])
+    real_models = [m for m in models if m != "(cached)"]
+    return {
+        **_token_usage,
+        "cache_hits": _token_usage.get("cache_hits", 0),
+        "model_used": real_models[0] if real_models else "unknown",
+        "all_models_used": real_models,
+        "source": "cache" if (not real_models and _token_usage.get("cache_hits", 0) > 0) else "llm",
+    }
+
+
+def reset_token_usage():
+    """Reset token counters and cache (call before a new analysis run)."""
+    _token_usage["total_prompt_tokens"] = 0
+    _token_usage["total_completion_tokens"] = 0
+    _token_usage["total_tokens"] = 0
+    _token_usage["calls"] = 0
+    _token_usage["cache_hits"] = 0
+    _token_usage["models_used"] = []
+    _token_usage["fallback_count"] = 0
+    _response_cache.clear()
+
+
+def check_api_status() -> dict:
+    """Check if the LLM gateway is reachable and return available models."""
+    try:
+        # Quick health-check: try a tiny completion
+        _client.chat.completions.create(
+            model=DEFAULT_MODEL,
+            messages=[{"role": "user", "content": "hi"}],
+            max_tokens=5,
+        )
+        return {"online": True, "models": AVAILABLE_MODELS}
+    except Exception as e:
+        return {"online": False, "models": [], "error": str(e)}
+
+
+def call_llm(prompt: str, model: str = DEFAULT_MODEL, temperature: float = 0.2, max_tokens: int = 2048) -> str:
+    """Send a prompt to the LLM gateway with caching, fallback, and token tracking."""
+    # Check cache first
+    key = _cache_key(prompt, model)
+    if key in _response_cache:
+        _token_usage["cache_hits"] = _token_usage.get("cache_hits", 0) + 1
+        if "(cached)" not in _token_usage.get("models_used", []):
+            _token_usage.setdefault("models_used", []).append("(cached)")
+        return _response_cache[key]
+
+    fallback_models = [model, "gpt-4.1-nano", "gpt-4o", "o3-mini", "gemini-2.5-flash-lite"]
+    seen = set()
+    models_to_try = []
+    for m in fallback_models:
+        if m not in seen:
+            seen.add(m)
+            models_to_try.append(m)
+
+    last_error = None
+    for attempt_model in models_to_try:
+        try:
+            response = _client.chat.completions.create(
+                model=attempt_model,
+                messages=[
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            # Track token usage
+            if response.usage:
+                _token_usage["total_prompt_tokens"] += response.usage.prompt_tokens or 0
+                _token_usage["total_completion_tokens"] += response.usage.completion_tokens or 0
+                _token_usage["total_tokens"] += response.usage.total_tokens or 0
+            _token_usage["calls"] += 1
+            # Track which model actually responded
+            if attempt_model not in _token_usage.get("models_used", []):
+                _token_usage.setdefault("models_used", []).append(attempt_model)
+            if attempt_model != model:
+                _token_usage["fallback_count"] = _token_usage.get("fallback_count", 0) + 1
+            result = response.choices[0].message.content.strip()
+            _response_cache[key] = result
+            return result
+        except Exception as e:
+            last_error = e
+            continue
+
+    raise RuntimeError(f"All models failed. Last error: {last_error}")
+
+
+def _load_prompt(name: str) -> str:
+    """Load a prompt template from the prompts/ directory."""
+    path = PROMPTS_DIR / f"{name}.txt"
+    return path.read_text(encoding="utf-8")
+
+
+# ── Summarization ──────────────────────────────────────────────────────────
+
+
+def summarize_document(chunks: list[dict], model: str = DEFAULT_MODEL, progress_callback=None) -> str:
+    """
+    Summarize a clinical document using map-reduce:
+    1. Summarize each chunk individually
+    2. Merge chunk summaries into a final summary
+    """
+    template = _load_prompt("summarize")
+    chunk_summaries = []
+
+    for i, chunk in enumerate(chunks):
+        prompt = template.replace("{chunk}", chunk["text"])
+        summary = call_llm(prompt, model=model, max_tokens=1024)
+        chunk_summaries.append(f"[Section: {chunk['section']}]\n{summary}")
+        if progress_callback:
+            progress_callback(i + 1, len(chunks), "Summarizing")
+
+    if len(chunk_summaries) == 1:
+        return chunk_summaries[0]
+
+    # Merge step — combine chunk summaries into one coherent summary
+    merge_prompt = (
+        "Merge these section summaries into ONE coherent clinical summary. "
+        "Structure: Study Overview, Objectives, Study Design, Patient Population, "
+        "Endpoints, Key Findings, Safety Profile, Critical Observations. "
+        "Remove duplicates. Keep under 800 words.\n\n"
+        + "\n\n---\n\n".join(chunk_summaries)
+    )
+    final = call_llm(merge_prompt, model=model, max_tokens=1500)
+    if progress_callback:
+        progress_callback(len(chunks), len(chunks), "Merging summaries")
+    return final
+
+
+# ── Entity Extraction ──────────────────────────────────────────────────────
+
+
+def extract_entities(chunks: list[dict], model: str = DEFAULT_MODEL, progress_callback=None) -> dict:
+    """
+    Extract structured clinical entities from document chunks.
+    Returns merged entities across all chunks.
+    """
+    template = _load_prompt("extract_entities")
+    all_entities = _empty_entities()
+
+    for i, chunk in enumerate(chunks):
+        prompt = template.replace("{chunk}", chunk["text"])
+        raw = call_llm(prompt, model=model, temperature=0.1, max_tokens=1024)
+        parsed = _parse_json_response(raw)
+        if parsed:
+            _merge_entities(all_entities, parsed)
+        if progress_callback:
+            progress_callback(i + 1, len(chunks), "Extracting entities")
+
+    return all_entities
+
+
+def _empty_entities() -> dict:
+    return {
+        "drugs": [],
+        "primary_endpoints": [],
+        "secondary_endpoints": [],
+        "exploratory_endpoints": [],
+        "inclusion_criteria": [],
+        "exclusion_criteria": [],
+        "adverse_events": [],
+        "study_phase": "Not mentioned",
+        "sample_size": "Not mentioned",
+        "study_design": "Not mentioned",
+        "therapeutic_area": "Not mentioned",
+        "sponsor": "Not mentioned",
+    }
+
+
+def _merge_entities(target: dict, source: dict):
+    """Merge extracted entities from a chunk into the accumulated result."""
+    for key in ["drugs", "adverse_events"]:
+        existing_names = {
+            item.get("name", item.get("event", "")).lower()
+            for item in target.get(key, [])
+        }
+        for item in source.get(key, []):
+            name = item.get("name", item.get("event", "")).lower()
+            if name and name not in existing_names:
+                target[key].append(item)
+                existing_names.add(name)
+
+    for key in [
+        "primary_endpoints", "secondary_endpoints", "exploratory_endpoints",
+        "inclusion_criteria", "exclusion_criteria",
+    ]:
+        existing = {v.lower() for v in target.get(key, [])}
+        for val in source.get(key, []):
+            if isinstance(val, str) and val.lower() not in existing:
+                target[key].append(val)
+                existing.add(val.lower())
+
+    # Scalar fields — take the first non-empty value
+    for key in ["study_phase", "sample_size", "study_design", "therapeutic_area", "sponsor"]:
+        src_val = source.get(key, "Not mentioned")
+        if src_val and src_val != "Not mentioned" and target.get(key) == "Not mentioned":
+            target[key] = src_val
+
+
+# ── Risk / Consistency Checking ────────────────────────────────────────────
+
+
+def check_risks(chunks: list[dict], model: str = DEFAULT_MODEL, doc_type: str = "protocol", progress_callback=None) -> dict:
+    """
+    Run consistency and risk analysis on document chunks.
+    Uses doc-type-specific prompt: risk_check_csr for CSRs, risk_check for others.
+    Returns aggregated findings. Section coverage is handled
+    separately by the rule-based checker (zero LLM cost).
+    """
+    prompt_name = "risk_check_csr" if doc_type == "csr" else "risk_check_protocol"
+    template = _load_prompt(prompt_name)
+    all_findings = []
+
+    for i, chunk in enumerate(chunks):
+        prompt = template.replace("{chunk}", chunk["text"])
+        raw = call_llm(prompt, model=model, temperature=0.15, max_tokens=1500)
+        parsed = _parse_json_response(raw)
+        if parsed:
+            findings = parsed.get("findings", [])
+            for f in findings:
+                f["source_chunk"] = chunk["section"]
+            all_findings.extend(findings)
+
+        if progress_callback:
+            progress_callback(i + 1, len(chunks), "Checking risks")
+
+    # Deduplicate findings by title similarity
+    unique_findings = _deduplicate_findings(all_findings)
+
+    return {
+        "findings": unique_findings,
+        "ich_gcp_checklist": {},
+        "total_findings": len(unique_findings),
+        "high_count": sum(1 for f in unique_findings if f.get("severity") == "HIGH"),
+        "medium_count": sum(1 for f in unique_findings if f.get("severity") == "MEDIUM"),
+        "low_count": sum(1 for f in unique_findings if f.get("severity") == "LOW"),
+    }
+
+
+def _deduplicate_findings(findings: list[dict]) -> list[dict]:
+    """Remove near-duplicate findings based on title similarity."""
+    seen_titles = set()
+    unique = []
+    for f in findings:
+        title_lower = f.get("title", "").lower().strip()
+        # Simple dedup — exact title match
+        if title_lower and title_lower not in seen_titles:
+            seen_titles.add(title_lower)
+            unique.append(f)
+    return unique
+
+
+# ── Consent Form Analysis ──────────────────────────────────────────────────
+
+
+def analyze_consent_form(chunks: list[dict], model: str = DEFAULT_MODEL, progress_callback=None) -> dict:
+    """
+    Analyze an informed consent form for ICH-GCP 4.8 compliance.
+    Returns consent elements checklist, readability assessment, and findings.
+    """
+    template = _load_prompt("consent_check")
+    all_findings = []
+    merged_elements = {}
+
+    for i, chunk in enumerate(chunks):
+        prompt = template.replace("{chunk}", chunk["text"])
+        raw = call_llm(prompt, model=model, temperature=0.1, max_tokens=1024)
+        parsed = _parse_json_response(raw)
+        if parsed:
+            # Merge consent elements — handles {status, evidence} dicts and booleans
+            elements = parsed.get("consent_elements", {})
+            for key, val in elements.items():
+                prev = merged_elements.get(key)
+                if isinstance(val, dict):
+                    status = val.get("status", "unknown").lower()
+                    # Upgrade rule: present > partial > missing > unknown
+                    rank = {"present": 3, "partial": 2, "missing": 1, "unknown": 0}
+                    new_rank = rank.get(status, 0)
+                    old_rank = 0
+                    if isinstance(prev, dict):
+                        old_rank = rank.get(prev.get("status", "unknown").lower(), 0)
+                    elif prev is True:
+                        old_rank = 3
+                    if new_rank > old_rank:
+                        merged_elements[key] = val
+                elif val is True:
+                    merged_elements[key] = {"status": "present", "evidence": ""}
+                elif key not in merged_elements:
+                    merged_elements[key] = {"status": "unknown", "evidence": ""}
+
+            findings = parsed.get("findings", [])
+            for f in findings:
+                f["source_chunk"] = chunk.get("section", "Unknown")
+            all_findings.extend(findings)
+
+        if progress_callback:
+            progress_callback(i + 1, len(chunks), "Analyzing consent form")
+
+    # Calculate consent completeness based on status field
+    required_elements = [
+        "study_purpose", "procedures_described", "duration_stated",
+        "risks_disclosed", "benefits_described", "alternatives_mentioned",
+        "confidentiality_addressed", "voluntary_participation",
+        "withdrawal_rights", "compensation_mentioned",
+        "contact_information", "irb_information",
+    ]
+    present_count = 0
+    for e in required_elements:
+        val = merged_elements.get(e)
+        if isinstance(val, dict):
+            present_count += 1 if val.get("status", "").lower() == "present" else 0
+        elif val is True:
+            present_count += 1
+    completeness = round(present_count / len(required_elements) * 100, 1)
+
+    return {
+        "consent_elements": merged_elements,
+        "completeness_score": completeness,
+        "findings": all_findings,
+        "total_required": len(required_elements),
+        "present_count": present_count,
+    }
+
+
+# ── Document Type Detection ────────────────────────────────────────────────
+
+
+# Friendly labels for document types
+_DOC_TYPE_LABELS = {
+    "protocol": "Clinical Protocol",
+    "csr": "Clinical Study Report",
+    "consent_form": "Consent Form",
+    "clinical_document": "Clinical Document",
+}
+
+
+def detect_document_type(text: str) -> str:
+    """Detect if the document is a protocol, CSR, consent form, or generic clinical doc."""
+    text_lower = text[:3000].lower()
+
+    consent_keywords = ["informed consent", "consent form", "i voluntarily agree",
+                        "authorization to participate", "withdrawal from study",
+                        "i have read and understand"]
+    protocol_keywords = ["study protocol", "protocol number", "study objectives",
+                         "inclusion criteria", "exclusion criteria", "primary endpoint"]
+    csr_keywords = ["clinical study report", "study results", "efficacy analysis",
+                    "safety analysis", "statistical analysis results"]
+
+    consent_score = sum(1 for kw in consent_keywords if kw in text_lower)
+    protocol_score = sum(1 for kw in protocol_keywords if kw in text_lower)
+    csr_score = sum(1 for kw in csr_keywords if kw in text_lower)
+
+    if consent_score >= 2 and consent_score > protocol_score:
+        return "consent_form"
+    elif csr_score >= 2 and csr_score > protocol_score:
+        return "csr"
+    elif protocol_score >= 2:
+        return "protocol"
+    else:
+        return "clinical_document"
+
+
+def get_doc_type_label(doc_type: str) -> str:
+    """Return a user-friendly label for the detected document type."""
+    return _DOC_TYPE_LABELS.get(doc_type, doc_type)
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────
+
+
+def _parse_json_response(text: str) -> dict | None:
+    """Extract JSON from LLM response, which may contain surrounding text."""
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Try to find JSON block within the text
+    patterns = [
+        re.compile(r"```json\s*(.*?)\s*```", re.DOTALL),
+        re.compile(r"```\s*(.*?)\s*```", re.DOTALL),
+        re.compile(r"(\{.*\})", re.DOTALL),
+    ]
+    for pattern in patterns:
+        match = pattern.search(text)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except json.JSONDecodeError:
+                continue
+    return None

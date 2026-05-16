@@ -1,0 +1,18 @@
+# ClinDoc AI — Dependencies
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+
+# Document parsing
+PyMuPDF>=1.23.0
+pdfplumber>=0.10.0
+python-docx>=0.8.11
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# LLM integration
+openai>=1.0.0
+
+# Report generation
+fpdf2>=2.7.0

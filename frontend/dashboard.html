@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard — ClinDoc AI</title>
+    <script src="/static/js/theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'] } } } }</script>
+</head>
+<body class="font-sans min-h-screen" style="background:var(--bg-primary);color:var(--text-primary);">
+
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl border-b" style="background:var(--bg-header);border-color:var(--border-primary);">
+        <div class="max-w-[1400px] mx-auto px-6 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style="background:var(--gradient-primary);">🏥</div>
+                <span class="font-bold text-sm" style="color:var(--text-heading);">ClinDoc<span style="color:var(--text-accent);">AI</span></span>
+            </div>
+            <div class="flex items-center gap-5">
+                <nav class="flex items-center gap-1 rounded-lg p-1" style="background:var(--bg-input);">
+                    <a href="/analyzer" class="px-4 py-1.5 text-xs font-semibold rounded-md transition" style="color:var(--text-muted);">Analyzer</a>
+                    <a href="/dashboard" class="px-4 py-1.5 text-xs font-semibold rounded-md" style="background:var(--bg-accent-soft);color:var(--text-heading);">My Dashboard</a>
+                </nav>
+                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle theme">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <span id="user-name" class="text-sm" style="color:var(--text-secondary);"></span>
+                <button onclick="handleLogout()" class="text-xs transition px-3 py-1.5 rounded-lg" style="color:var(--text-muted);" onmouseover="this.style.color='var(--clinical-red)'" onmouseout="this.style.color='var(--text-muted)'">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-[1400px] mx-auto px-6 py-8">
+
+        <!-- Header + Stats -->
+        <div class="flex items-center justify-between mb-6 animate-slide-up">
+            <div>
+                <h1 class="text-2xl font-bold mb-1" style="color:var(--text-heading);" id="greeting">My Dashboard</h1>
+                <p class="text-sm" style="color:var(--text-muted);">Your analysis activity, history & feedback</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="rounded-xl border px-5 py-3 text-center" style="background:var(--bg-card);border-color:var(--border-card);">
+                    <div id="stat-total-analyses" class="text-2xl font-black" style="color:var(--clinical-teal);">0</div>
+                    <div class="text-xs font-medium" style="color:var(--text-muted);">Total Analyses</div>
+                </div>
+                <div class="rounded-xl border px-5 py-3 text-center" style="background:var(--bg-card);border-color:var(--border-card);">
+                    <div id="stat-total-feedback" class="text-2xl font-black" style="color:var(--clinical-green);">0</div>
+                    <div class="text-xs font-medium" style="color:var(--text-muted);">Feedback Given</div>
+                </div>
+                <a href="/analyzer" class="px-5 py-3 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition flex items-center gap-2" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">New Analysis</a>
+            </div>
+        </div>
+
+        <!-- Row 1: Score Trend + Feedback Summary Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6 animate-slide-up">
+            <div class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
+                <h3 class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--text-muted);">Quality Score Trend</h3>
+                <div class="h-48"><canvas id="chart-score-trend"></canvas></div>
+            </div>
+            <div class="rounded-2xl border p-6 flex flex-col items-center" style="background:var(--bg-card);border-color:var(--border-card);">
+                <h3 class="text-xs font-semibold uppercase tracking-wider mb-5" style="color:var(--text-muted);">My Feedback Summary</h3>
+                <div class="relative w-44 h-44">
+                    <div class="absolute inset-0 rounded-full" style="border:3px dashed color-mix(in srgb, var(--clinical-green) 15%, transparent);"></div>
+                    <div class="absolute inset-[6px]">
+                        <canvas id="chart-feedback"></canvas>
+                    </div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="feedback-total" class="text-4xl font-black tabular-nums" style="color:var(--text-heading);letter-spacing:-1px;">0</span>
+                        <span class="text-[10px] font-semibold mt-1 uppercase tracking-wider" style="color:var(--text-muted);">total</span>
+                    </div>
+                </div>
+                <div class="flex gap-5 mt-4">
+                    <span class="flex items-center gap-1.5 text-xs" style="color:var(--text-secondary);"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--clinical-green);"></span> Positive</span>
+                    <span class="flex items-center gap-1.5 text-xs" style="color:var(--text-secondary);"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--clinical-red);"></span> Negative</span>
+                </div>
+                <p id="feedback-label" class="text-xs mt-3 font-medium" style="color:var(--text-muted);">Submit feedback on analyses</p>
+            </div>
+        </div>
+
+        <!-- Row 2: Analysis History (table layout) -->
+        <div class="rounded-2xl border p-6 mb-6 animate-slide-up" style="background:var(--bg-card);border-color:var(--border-card);">
+            <div class="flex items-center gap-2 mb-5">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style="background:var(--bg-accent-soft);">📋</div>
+                <h2 class="text-base font-bold" style="color:var(--text-heading);">Recent Analyses</h2>
+                <span id="history-count" class="text-xs ml-auto" style="color:var(--text-muted);">Last 5</span>
+            </div>
+            <!-- Table header -->
+            <div id="history-header" class="hidden grid grid-cols-12 gap-3 px-4 pb-2 mb-2 text-xs font-semibold uppercase tracking-wider" style="color:var(--text-muted);border-bottom:1px solid var(--border-card);">
+                <div class="col-span-4">Document</div>
+                <div class="col-span-2 text-center">Score</div>
+                <div class="col-span-2 text-center">Findings</div>
+                <div class="col-span-2 text-center">Compliance</div>
+                <div class="col-span-2 text-right">Date</div>
+            </div>
+            <div id="history-list" class="space-y-2">
+                <p id="no-history-msg" class="text-sm text-center py-8" style="color:var(--text-muted);">No analyses yet. <a href="/analyzer" class="underline" style="color:var(--text-accent);">Analyze a document</a> to get started!</p>
+            </div>
+        </div>
+
+        <!-- Row 3: Feedback History (timeline style) -->
+        <div class="rounded-2xl border p-6 animate-slide-up" style="background:var(--bg-card);border-color:var(--border-card);">
+            <div class="flex items-center gap-2 mb-5">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style="background:rgba(5,150,105,0.08);">💬</div>
+                <h2 class="text-base font-bold" style="color:var(--text-heading);">My Feedback</h2>
+                <span id="feedback-count" class="text-xs ml-auto" style="color:var(--text-muted);"></span>
+            </div>
+            <div id="feedback-list" class="space-y-0">
+                <p id="no-feedback-msg" class="text-sm text-center py-6" style="color:var(--text-muted);">No feedback submitted yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

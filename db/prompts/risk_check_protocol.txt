@@ -1,0 +1,38 @@
+Review this clinical protocol text for quality issues based on ICH-GCP E6(R2).
+
+Check for:
+- Missing or incomplete required sections (objectives, design, endpoints, population, safety, etc.)
+- Internal contradictions or inconsistencies
+- Ambiguous or unclear language
+- Safety gaps or inadequate safety monitoring details
+- Regulatory compliance issues
+
+Return ONLY valid JSON:
+
+{
+  "findings": [
+    {
+      "category": "structure_completeness | data_consistency | safety_protocol | clarity_language | regulatory_compliance",
+      "severity": "HIGH|MEDIUM|LOW",
+      "title": "",
+      "description": "",
+      "section_reference": "",
+      "evidence": "",
+      "recommendation": ""
+    }
+  ],
+  "overall_quality_notes": ""
+}
+
+RULES:
+- Follow ICH-GCP E6(R2) expectations
+- HIGH severity: safety issues, missing critical sections, major inconsistencies
+- MEDIUM severity: incomplete or unclear descriptions
+- LOW severity: minor wording or clarity issues
+- If information is not present in this chunk, mark as "unclear" instead of missing
+- Provide short evidence from text for each finding
+- Infer likely section if not explicitly stated
+- Be precise and avoid hallucination
+
+Document text:
+{chunk}

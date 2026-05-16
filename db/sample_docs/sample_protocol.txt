@@ -1,0 +1,158 @@
+CLINICAL STUDY PROTOCOL
+
+Protocol Number: OPT-2024-001
+Study Title: A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Metformin XR 1000mg in Patients with Type 2 Diabetes Mellitus
+
+Sponsor: Optum Clinical Research Inc.
+Protocol Version: 2.0
+Date: March 15, 2024
+
+1. STUDY OBJECTIVES
+
+1.1 Primary Objective
+To evaluate the efficacy of Metformin XR 1000mg compared to placebo in reducing HbA1c levels from baseline to Week 24 in adult patients with Type 2 Diabetes Mellitus (T2DM).
+
+1.2 Secondary Objectives
+- To assess the effect of Metformin XR on fasting plasma glucose (FPG) at Week 12 and Week 24
+- To evaluate the proportion of patients achieving HbA1c < 7.0% at Week 24
+- To assess changes in body weight from baseline to Week 24
+- To evaluate the safety and tolerability profile of Metformin XR 1000mg
+
+2. STUDY DESIGN
+
+This is a Phase III, multicenter, randomized, double-blind, placebo-controlled, parallel-group study. Approximately 500 patients will be randomized in a 1:1 ratio to receive either Metformin XR 1000mg or matching placebo once daily for 24 weeks.
+
+The study consists of the following periods:
+- Screening Period: 2 weeks
+- Run-in Period: 2 weeks (single-blind placebo)
+- Treatment Period: 24 weeks
+- Follow-up Period: 4 weeks
+
+3. STUDY POPULATION
+
+3.1 Inclusion Criteria
+1. Male or female patients aged 18-75 years
+2. Diagnosed with Type 2 Diabetes Mellitus for at least 3 months
+3. HbA1c between 7.5% and 10.5% at screening
+4. Body Mass Index (BMI) between 25 and 40 kg/m²
+5. Stable diet and exercise regimen for at least 8 weeks prior to screening
+6. Willing and able to provide written informed consent
+
+3.2 Exclusion Criteria
+1. Type 1 Diabetes Mellitus or gestational diabetes
+2. History of diabetic ketoacidosis within the past 6 months
+3. Estimated GFR < 45 mL/min/1.73m² (moderate-to-severe renal impairment)
+4. ALT or AST > 3x upper limit of normal
+5. Known hypersensitivity to metformin or any excipients
+6. Current use of insulin or GLP-1 receptor agonists
+7. Pregnant or breastfeeding women
+8. History of lactic acidosis
+9. Planned surgical procedure during the study period
+10. Participation in another clinical trial within 30 days of screening
+
+4. ENDPOINTS
+
+4.1 Primary Endpoint
+Change from baseline in HbA1c at Week 24.
+
+4.2 Secondary Endpoints
+- Change from baseline in fasting plasma glucose (FPG) at Week 12 and Week 24
+- Proportion of patients achieving HbA1c < 7.0% at Week 24
+- Change from baseline in body weight at Week 24
+- Time to achieve HbA1c < 7.0%
+
+4.3 Exploratory Endpoints
+- Change in lipid profile (total cholesterol, LDL, HDL, triglycerides)
+- Change in HOMA-IR (insulin resistance index)
+- Patient-reported outcomes using the Diabetes Treatment Satisfaction Questionnaire (DTSQ)
+
+5. TREATMENT DESCRIPTION
+
+5.1 Investigational Product
+- Drug Name: Metformin Extended-Release (XR)
+- Dosage: 1000mg
+- Route of Administration: Oral
+- Frequency: Once daily with evening meal
+- Duration: 24 weeks
+
+5.2 Comparator
+- Matching placebo tablets
+- Route of Administration: Oral
+- Frequency: Once daily with evening meal
+
+6. SAFETY MONITORING
+
+6.1 Adverse Events
+All adverse events (AEs) will be recorded from the time of informed consent through the follow-up visit. Serious adverse events (SAEs) will be reported within 24 hours to the sponsor.
+
+6.2 Known Adverse Events for Metformin
+- Gastrointestinal disorders: nausea (frequency: 20-25%), diarrhea (frequency: 15-20%), abdominal pain (frequency: 10-15%), vomiting (frequency: 5-8%)
+- Lactic acidosis (rare but potentially fatal, frequency: < 0.01%)
+- Vitamin B12 deficiency (frequency: 5-10% with long-term use)
+- Hypoglycemia (frequency: < 3% as monotherapy)
+- Metallic taste (frequency: 3-5%)
+
+6.3 Data Safety Monitoring Board (DSMB)
+An independent DSMB will review unblinded safety data at planned intervals (after 100, 250, and 400 patients complete Week 12).
+
+7. STATISTICAL METHODS
+
+7.1 Sample Size Justification
+Assuming a treatment difference of -0.5% in HbA1c change, standard deviation of 1.2%, two-sided alpha of 0.05, and 90% power, approximately 244 patients per group are required. With an anticipated 3% dropout rate, 500 patients total will be randomized.
+
+7.2 Analysis Populations
+- Intent-to-Treat (ITT): All randomized patients
+- Per-Protocol (PP): All patients who complete the study without major protocol deviations
+- Safety Population: All patients who receive at least one dose of study medication
+
+7.3 Primary Analysis
+The primary endpoint will be analyzed using a mixed-model repeated measures (MMRM) approach with treatment, visit, treatment-by-visit interaction, baseline HbA1c, and stratification factors as covariates.
+
+7.4 Handling of Missing Data
+Missing data will be handled using the MMRM model (which assumes missing at random). Sensitivity analyses will include tipping point analysis and multiple imputation.
+
+8. ETHICAL CONSIDERATIONS
+
+8.1 Informed Consent
+Written informed consent will be obtained from each patient prior to any study-specific procedures. The informed consent form (ICF) will be approved by the Institutional Review Board (IRB) / Independent Ethics Committee (IEC).
+
+8.2 Ethics Committee Approval
+The study will be conducted in accordance with the Declaration of Helsinki, ICH-GCP E6(R2) guidelines, and applicable local regulations. IRB/IEC approval will be obtained before study initiation at each site.
+
+8.3 Patient Confidentiality
+All patient data will be handled in compliance with applicable data protection regulations (HIPAA, GDPR where applicable).
+
+9. DATA MANAGEMENT
+
+9.1 Electronic Data Capture
+Data will be collected using a validated electronic data capture (EDC) system. All case report forms (CRFs) will be designed, reviewed, and approved prior to study start.
+
+9.2 Data Quality
+Source data verification (SDV) will be performed for 100% of primary endpoint data and at least 20% of all other data points. Query resolution will follow a standardized process with target resolution within 7 business days.
+
+10. QUALITY ASSURANCE
+
+10.1 Monitoring Plan
+Clinical Research Associates (CRAs) will conduct regular monitoring visits (on-site or remote) to ensure protocol compliance, data quality, and patient safety.
+
+10.2 Audit
+The sponsor reserves the right to audit any study site, and regulatory authorities may inspect the site at any time. All study documents must be retained for at least 15 years after study completion.
+
+11. SCHEDULE OF ASSESSMENTS
+
+Visit Schedule:
+- Visit 1 (Screening): Week -4 to -2 — Informed consent, demographics, medical history, physical exam, lab tests (HbA1c, FPG, CBC, metabolic panel, lipid panel), pregnancy test, ECG
+- Visit 2 (Randomization): Day 1 — Eligibility confirmation, randomization, first dose, vital signs
+- Visit 3: Week 4 — AE assessment, concomitant medications, FPG, vital signs
+- Visit 4: Week 8 — AE assessment, FPG, vital signs, adherence check
+- Visit 5: Week 12 — HbA1c, FPG, body weight, lab tests, AE assessment
+- Visit 6: Week 18 — AE assessment, FPG, vital signs
+- Visit 7: Week 24 (End of Treatment) — HbA1c, FPG, body weight, lab tests, AE assessment, physical exam, ECG, DTSQ
+- Visit 8: Week 28 (Follow-up) — Final AE assessment, vital signs
+
+12. REFERENCES
+
+1. American Diabetes Association. Standards of Medical Care in Diabetes — 2024. Diabetes Care. 2024;47(Suppl 1):S1-S321.
+2. International Conference on Harmonisation. ICH E6(R2) Guideline for Good Clinical Practice. 2016.
+3. DeFronzo RA, et al. Metformin-associated lactic acidosis: Current perspectives. Metabolism. 2016;65(2):20-29.
+4. UK Prospective Diabetes Study Group. Effect of intensive blood-glucose control with metformin. Lancet. 1998;352:854-865.

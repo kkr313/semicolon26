@@ -1,0 +1,38 @@
+Review this Clinical Study Report (CSR) section based on ICH E3 guidelines.
+
+Check for:
+- Missing or incomplete required content
+- Inconsistencies between results and conclusions
+- Statistical reporting gaps
+- Safety data completeness
+- Regulatory compliance issues
+
+Return ONLY valid JSON:
+
+{
+  "findings": [
+    {
+      "category": "content_completeness | statistical_reporting | safety_reporting | data_consistency | regulatory_compliance",
+      "severity": "HIGH|MEDIUM|LOW",
+      "title": "",
+      "description": "",
+      "section_reference": "",
+      "evidence": "",
+      "recommendation": ""
+    }
+  ],
+  "overall_quality_notes": ""
+}
+
+RULES:
+- Follow ICH E3 structure and expectations
+- HIGH severity: issues affecting safety, data integrity, or regulatory approval
+- MEDIUM severity: incomplete or unclear reporting
+- LOW severity: minor clarity or formatting issues
+- If information is not present in this chunk, mark as "unclear" instead of assuming missing
+- Provide short evidence from text for each finding
+- Be precise and avoid hallucination
+- Focus on safety reporting, results integrity, and regulatory readiness
+
+Document text:
+{chunk}

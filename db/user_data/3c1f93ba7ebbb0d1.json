@@ -1,0 +1,81 @@
+{
+  "user_id": "3c1f93ba7ebbb0d1",
+  "total_analyses": 25,
+  "history": [
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T08:30:45.897909",
+      "doc_type": "protocol",
+      "quality_score": 60.0,
+      "quality_grade": "C",
+      "findings_count": 15,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T08:37:41.655790",
+      "doc_type": "protocol",
+      "quality_score": 62.0,
+      "quality_grade": "C",
+      "findings_count": 16,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T08:45:01.888872",
+      "doc_type": "protocol",
+      "quality_score": 60.0,
+      "quality_grade": "C",
+      "findings_count": 17,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T08:49:32.403104",
+      "doc_type": "protocol",
+      "quality_score": 60.0,
+      "quality_grade": "C",
+      "findings_count": 18,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T10:15:22.321307",
+      "doc_type": "protocol",
+      "quality_score": 60.0,
+      "quality_grade": "C",
+      "findings_count": 16,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    }
+  ],
+  "feedback": [
+    {
+      "filename": "sample_protocol.txt_report.pdf",
+      "rating": "positive",
+      "comment": "Looks Good",
+      "submitted_at": "2026-05-16T01:31:34.837232"
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "rating": "negative",
+      "comment": "Not good.",
+      "submitted_at": "2026-05-16T01:32:36.784493"
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "rating": "negative",
+      "comment": "not accurate",
+      "submitted_at": "2026-05-16T10:16:41.877154"
+    }
+  ]
+}

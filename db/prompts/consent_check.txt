@@ -1,0 +1,50 @@
+Analyze this informed consent form (ICF) section. Extract key elements and check completeness per ICH-GCP E6(R2) Section 4.8.
+
+Return ONLY valid JSON:
+
+{
+  "consent_elements": {
+    "study_purpose": {"status":"present|partial|missing|unknown","evidence":""},
+    "procedures_described": {"status":"present|partial|missing|unknown","evidence":""},
+    "duration_stated": {"status":"present|partial|missing|unknown","evidence":""},
+    "risks_disclosed": {"status":"present|partial|missing|unknown","evidence":""},
+    "benefits_described": {"status":"present|partial|missing|unknown","evidence":""},
+    "alternatives_mentioned": {"status":"present|partial|missing|unknown","evidence":""},
+    "confidentiality_addressed": {"status":"present|partial|missing|unknown","evidence":""},
+    "voluntary_participation": {"status":"present|partial|missing|unknown","evidence":""},
+    "withdrawal_rights": {"status":"present|partial|missing|unknown","evidence":""},
+    "compensation_mentioned": {"status":"present|partial|missing|unknown","evidence":""},
+    "contact_information": {"status":"present|partial|missing|unknown","evidence":""},
+    "irb_information": {"status":"present|partial|missing|unknown","evidence":""}
+  },
+
+  "readability": {
+    "level": "EASY|MODERATE|COMPLEX",
+    "has_complex_jargon": false,
+    "jargon_examples": []
+  },
+
+  "findings": [
+    {
+      "category": "",
+      "severity": "HIGH|MEDIUM|LOW",
+      "title": "",
+      "description": "",
+      "recommendation": ""
+    }
+  ],
+
+  "summary": ""
+}
+
+RULES:
+- Follow ICH-GCP Section 4.8
+- If element is missing → HIGH severity
+- If partially described → MEDIUM severity
+- If not identifiable in this chunk → mark as "unknown"
+- Provide short evidence text for each detected element
+- Highlight readability issues clearly
+- Be precise and avoid hallucination
+
+Document text:
+{chunk}

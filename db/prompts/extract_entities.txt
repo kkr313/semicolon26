@@ -1,0 +1,45 @@
+Extract structured clinical entities from the text below.
+
+Return ONLY valid JSON:
+
+{
+  "drugs": [
+    {
+      "name": "",
+      "dosage": "",
+      "route": "",
+      "frequency": ""
+    }
+  ],
+  "primary_endpoints": [],
+  "secondary_endpoints": [],
+  "exploratory_endpoints": [],
+  "inclusion_criteria": [],
+  "exclusion_criteria": [],
+  "adverse_events": [
+    {
+      "event": "",
+      "severity": "",
+      "frequency": ""
+    }
+  ],
+  "study_phase": "",
+  "sample_size": "",
+  "study_design": "",
+  "therapeutic_area": "",
+  "sponsor": ""
+}
+
+RULES:
+- Extract ONLY explicitly mentioned information from THIS chunk
+- Do NOT infer or assume missing data
+- If no data exists:
+    - return [] for arrays
+    - return "Not mentioned" for string fields
+- Return ALL occurrences (do not limit to one item)
+- Normalize common terms (e.g., "oral" instead of "PO", "twice daily" instead of "BID")
+- Avoid duplication
+- Be precise and avoid hallucination
+
+Document text:
+{chunk}

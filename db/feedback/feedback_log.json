@@ -1,0 +1,54 @@
+[
+  {
+    "timestamp": "2026-05-15T22:53:29.231661",
+    "document": "sample_protocol.txt",
+    "user_role": "Clinical Operations",
+    "rating": "negative",
+    "comment": "good",
+    "flagged_entities": [
+      {
+        "type": "drug",
+        "value": "Metformin XR",
+        "issue": "incorrect"
+      },
+      {
+        "type": "drug",
+        "value": "Placebo",
+        "issue": "incorrect"
+      }
+    ],
+    "section_feedback": {
+      "Summary": 4,
+      "Entities": 2,
+      "Risk Findings": 4,
+      "ICH-GCP Checklist": 4
+    }
+  },
+  {
+    "timestamp": "2026-05-16T01:31:34.815024",
+    "document": "sample_protocol.txt_report.pdf",
+    "user_role": "user",
+    "rating": "positive",
+    "comment": "Looks Good",
+    "flagged_entities": [],
+    "section_feedback": {}
+  },
+  {
+    "timestamp": "2026-05-16T01:32:36.756108",
+    "document": "sample_protocol.txt",
+    "user_role": "user",
+    "rating": "negative",
+    "comment": "Not good.",
+    "flagged_entities": [],
+    "section_feedback": {}
+  },
+  {
+    "timestamp": "2026-05-16T10:16:41.840883",
+    "document": "sample_protocol.txt",
+    "user_role": "user",
+    "rating": "negative",
+    "comment": "not accurate",
+    "flagged_entities": [],
+    "section_feedback": {}
+  }
+]
