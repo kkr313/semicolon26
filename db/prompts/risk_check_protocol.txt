@@ -1,18 +1,34 @@
-Review this clinical protocol text for quality issues based on ICH-GCP E6(R2).
+Review this clinical protocol text for quality issues based on **ICH M11** (Clinical Electronic Structured Harmonised Protocol).
 
-Check for:
-- Missing or incomplete required sections (objectives, design, endpoints, population, safety, etc.)
+ICH M11 defines the international standard template for clinical trial protocols. Check against the following M11 sections:
+- Section 2 Synopsis
+- Section 3 Schedule of Activities
+- Section 4 Introduction & Rationale (including benefit-risk assessment)
+- Section 5 Objectives & Estimands (intercurrent events, estimand framework per ICH E9(R1))
+- Section 6 Study Design
+- Section 7 Study Population (inclusion/exclusion criteria)
+- Section 8 Study Intervention & Concomitant Therapy
+- Section 9 Discontinuation / Withdrawal Criteria
+- Section 10 Study Assessments & Endpoints
+- Section 11 Adverse Events & Safety Reporting
+- Section 12 Statistical Considerations (sample size, missing data, multiplicity)
+- Section 13 Oversight & Monitoring (DSMB, monitoring plan)
+- Section 14 Ethics & Regulatory
+- Section 15 Data Management & Records
+
+Also check for:
 - Internal contradictions or inconsistencies
 - Ambiguous or unclear language
 - Safety gaps or inadequate safety monitoring details
-- Regulatory compliance issues
+- Missing estimand framework elements (ICH E9(R1))
+- Inadequate discontinuation / rescue criteria
 
 Return ONLY valid JSON:
 
 {
   "findings": [
     {
-      "category": "structure_completeness | data_consistency | safety_protocol | clarity_language | regulatory_compliance",
+      "category": "structure_completeness | data_consistency | safety_protocol | clarity_language | regulatory_compliance | estimand_framework",
       "severity": "HIGH|MEDIUM|LOW",
       "title": "",
       "description": "",
@@ -25,7 +41,8 @@ Return ONLY valid JSON:
 }
 
 RULES:
-- Follow ICH-GCP E6(R2) expectations
+- Follow ICH M11 structure expectations
+- Reference ICH M11 section numbers (e.g., "M11 Section 12 — Statistical Considerations")
 - HIGH severity: safety issues, missing critical sections, major inconsistencies
 - MEDIUM severity: incomplete or unclear descriptions
 - LOW severity: minor wording or clarity issues

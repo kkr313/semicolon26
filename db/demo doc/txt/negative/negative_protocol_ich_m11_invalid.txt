@@ -1,0 +1,88 @@
+
+Clinical Protocol
+
+Protocol Title	Study of CLN-201 in inflammatory condition maybe final
+Protocol Number	CLN-201-2026-01 / CLN-201-2026-07
+Investigational Product	CLN-201
+Sponsor	NovaCura Biotech or NovaCura Bio
+Phase	Phase II or III
+Date	2026-05-10 maybe updated 2026-05-16
+Version	draft / final pending
+1.	Protocol Summary
+
+This protocol describes a study of CLN-201 in inflammatory disease. The study is designed to assess if the drug works and is safe.
+
+Item	Description
+Design	Randomized, blind placebo study, maybe open-label at some sites.
+Population	Adults 18 to 70 or 75 years old.
+Sample Size	100 or 120 patients depending on enrollment feasibility.
+Treatment	CLN-201 10 mg once daily, possibly twice daily if not responding.
+Control	Placebo / comparator not finalized.
+Duration	10 weeks treatment, or 12 weeks, with follow-up 2 weeks maybe 4.
+Primary Endpoint	Change in score at Week 8, maybe Week 12 if available.
+
+2.	Introduction
+
+CLN-201 may help inflammatory disease symptoms. More details will be added later.
+
+3.	Objectives and Endpoints
+
+Primary objective: improve symptoms
+Secondary objectives: safety, labs, quality of life, biomarkers, other outcomes
+ 
+The main endpoint is disease improvement using a score that will be defined elsewhere.
+
+4.	Study Design
+
+This is a multicenter study with blinded procedures where possible. Some study sites may use open-label operations due to logistics.
+Participants may be randomized 1:1, although alternative allocation may be used if needed.
+
+5.	Study Population
+
+5.1	Inclusion Criteria
+
+  Adults with inflammatory disease
+  Stable medications maybe 4 weeks   Can sign consent
+
+5.2	Exclusion Criteria
+
+  Infection   Pregnant
+  Heart issue
+  Other exclusions to be added
+
+6.	Treatment of Participants
+
+Participants will receive CLN-201. Placebo or active comparator may be used depending on final regional strategy.
+Dose may increase if participants do not respond.
+
+7.	Study Assessments and Procedures
+
+Visits include screening, Week 1, Week 2, Week 4, Week 8, and end. Week 12 may also be used for endpoint collection.
+
+Assessment	Screening	Baseline	Week 1	Week 2	Week 4	Week 8	Week 12	End
+Informed consent	X							
+Eligibility review	X	X						
+ 
+
+Randomization		X					X	
+Drug dispensing		X	X	X	X	X	X	X
+Primary endpoint						X	X	
+8.	Adverse Event Reporting
+
+Adverse events and serious adverse events will be collected. Reporting timelines will follow standard practice.
+
+9.	Statistics
+
+Statistical methods will be standard. Sample size justification is not completed yet. Missing data handling will be described in the SAP if prepared.
+
+10.	Ethics and Regulatory Considerations
+
+The study will follow GCP and ethics requirements where applicable. Consent should be obtained before most study procedures.
+
+11.	Data Handling and Recordkeeping
+
+Data will be recorded and stored appropriately.
+
+12.	Appendices
+
+Schedule of activities (draft) Safety guidance (not attached) Pregnancy guidance (to be added)

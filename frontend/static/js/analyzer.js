@@ -14,7 +14,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user) { window.location.href = '/'; return; }
     document.getElementById('user-name').textContent = user.name || user.email;
     setupDropZone();
+    setupModeToggle();
+    checkLLMStatus();
+    loadModels();
 });
+
+/* ---- Mode Toggle ---- */
+function setupModeToggle() {
+    const toggle = document.getElementById('demo-toggle');
+    const track = document.getElementById('toggle-track');
+    updateModeUI(toggle.checked);
+    toggle.addEventListener('change', () => updateModeUI(toggle.checked));
+}
+
+function updateModeUI(isDemo) {
+    const label = document.getElementById('mode-label');
+    const desc = document.getElementById('mode-desc');
+    const track = document.getElementById('toggle-track');
+    const knob = document.getElementById('toggle-knob');
+    if (isDemo) {
+        label.textContent = 'DEMO MODE';
+        label.style.color = 'var(--clinical-amber)';
+        desc.textContent = 'Using pre-built sample data';
+        track.style.background = 'var(--clinical-amber)';
+        knob.style.transform = 'translateX(20px)';
+    } else {
+        label.textContent = 'LIVE MODE';
+        label.style.color = 'var(--clinical-green)';
+        desc.textContent = 'Using LLM Gateway';
+        track.style.background = 'var(--clinical-green)';
+        knob.style.transform = 'translateX(0)';
+    }
+}
 
 /* ---- LLM Status Check ---- */
 async function checkLLMStatus() {
@@ -27,6 +58,7 @@ async function checkLLMStatus() {
         const demoToggle = document.getElementById('demo-toggle');
         if (demoToggle && typeof data.demo_mode === 'boolean') {
             demoToggle.checked = data.demo_mode;
+            updateModeUI(data.demo_mode);
         }
         if (data.online) {
             dot.style.background = getCSSVar('--clinical-green');
@@ -56,12 +88,12 @@ async function loadModels() {
                 const opt = document.createElement('option');
                 opt.value = m;
                 opt.textContent = m;
-                if (m === 'gpt-4.1-nano') opt.selected = true;
+                if (m === 'gpt-4.1') opt.selected = true;
                 select.appendChild(opt);
             }
         }
     } catch {
-        select.innerHTML = '<option value="gpt-4.1-nano">gpt-4.1-nano</option>';
+        select.innerHTML = '<option value="gpt-4.1">gpt-4.1</option>';
     }
 }
 
@@ -111,10 +143,12 @@ function formatSize(bytes) {
 const AI_STEPS = [
     { pct: [0, 8],   label: 'Parsing',        messages: ['Reading document bytes...', 'Detecting file format...', 'Extracting raw text content...'] },
     { pct: [8, 15],  label: 'Chunking',       messages: ['Calculating token boundaries...', 'Building context-aware segments...'] },
-    { pct: [15, 40], label: 'NLP Extraction',  messages: ['Sending chunks to LLM for summarization...', 'Extracting clinical entities (drugs, endpoints, AEs)...', 'Waiting for LLM response...', 'Processing entity extraction results...'] },
-    { pct: [40, 70], label: 'Risk Scan',       messages: ['Running LLM risk analysis per chunk...', 'Checking ICH-GCP / ICH E3 compliance...', 'Evaluating severity of findings...', 'Cross-referencing regulatory rules...', 'Waiting for risk analysis response...'] },
-    { pct: [70, 85], label: 'Rule Checks',     messages: ['Running rule-based section coverage scan...', 'Checking abbreviations & ambiguous language...', 'Computing completeness score...'] },
-    { pct: [85, 95], label: 'Report',          messages: ['Calculating quality score & grade...', 'Building section coverage map...', 'Compiling final report...'] }
+    { pct: [15, 35], label: 'NLP Extraction',  messages: ['Sending chunks to LLM for summarization...', 'Extracting clinical entities (drugs, endpoints, AEs)...', 'Waiting for LLM response...', 'Processing entity extraction results...'] },
+    { pct: [35, 50], label: '\uD83D\uDEE1\uFE0F Safety Agent',  messages: ['Safety Agent analyzing AE/SAE reporting...', 'Checking stopping rules & DSMB oversight...', 'Reviewing rescue medication criteria...', 'Evaluating safety monitoring plan...'] },
+    { pct: [50, 65], label: '\uD83D\uDCCA Statistics Agent', messages: ['Statistics Agent reviewing sample size...', 'Checking endpoint definitions & multiplicity...', 'Evaluating missing data strategy...', 'Assessing randomization & analysis plan...'] },
+    { pct: [65, 80], label: '\uD83D\uDCCB Regulatory Agent', messages: ['Regulatory Agent checking ICH M11 structure...', 'Verifying ICH-GCP 4.8 consent compliance...', 'Reviewing ICH E3 CSR sections...', 'Assessing data integrity provisions...'] },
+    { pct: [80, 90], label: 'Rule Checks',     messages: ['Running rule-based section coverage scan...', 'Checking abbreviations & ambiguous language...', 'Computing completeness score...'] },
+    { pct: [90, 95], label: 'Report',          messages: ['Merging multi-agent findings...', 'Detecting cross-agent agreement...', 'Calculating quality score & grade...', 'Compiling final report...'] }
 ];
 
 let pipelineTimer = null;
@@ -194,7 +228,7 @@ function startPipelineAnimation(isDemoMode) {
         if (!stepEl.classList.contains('active')) {
             stepEl.classList.add('active');
             progressText.textContent = step.messages[0];
-            addLogLine(step.messages[0], ['parse', 'parse', 'nlp', 'risk', 'nlp', 'done'][currentStep]);
+            addLogLine(step.messages[0], ['parse', 'parse', 'nlp', 'risk', 'nlp', 'risk', 'nlp', 'done'][currentStep]);
             msgIdx = 1;
         }
 
@@ -211,7 +245,7 @@ function startPipelineAnimation(isDemoMode) {
         // Show next message
         if (msgIdx < step.messages.length && stepProgress > (msgIdx / step.messages.length) * 100) {
             progressText.textContent = step.messages[msgIdx];
-            addLogLine(step.messages[msgIdx], ['parse', 'parse', 'nlp', 'risk', 'nlp', 'done'][currentStep]);
+            addLogLine(step.messages[msgIdx], ['parse', 'parse', 'nlp', 'risk', 'nlp', 'risk', 'nlp', 'done'][currentStep]);
             msgIdx++;
         }
 
@@ -486,6 +520,64 @@ function renderResults(data) {
     findingsEl.innerHTML = '';
     window._allFindings = allFindings; // store for filtering
 
+    // Agent Panel — show 3 agent cards if agent_results present
+    const agentPanel = document.getElementById('agent-panel');
+    const agentCards = document.getElementById('agent-cards');
+    const agentResults = data.risk?.agent_results || {};
+    const hasAgents = Object.keys(agentResults).length > 0;
+
+    if (hasAgents && agentPanel && agentCards) {
+        agentPanel.classList.remove('hidden');
+        const agentIcons = {
+            shield: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
+            chart: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+            clipboard: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>',
+        };
+        const agentColors = { red: '--clinical-red', blue: '--clinical-blue', green: '--clinical-green' };
+        agentCards.innerHTML = '';
+        for (const [name, info] of Object.entries(agentResults)) {
+            const def = { shield: 'red', chart: 'blue', clipboard: 'green' };
+            const colorKey = name === 'safety' ? 'red' : name === 'statistics' ? 'blue' : 'green';
+            const colorVar = agentColors[colorKey] || '--clinical-teal';
+            const iconKey = name === 'safety' ? 'shield' : name === 'statistics' ? 'chart' : 'clipboard';
+            const confPct = Math.round((info.confidence || 0) * 100);
+            agentCards.innerHTML += `
+                <div class="rounded-xl p-4 transition-all hover:shadow-md cursor-pointer" style="background:color-mix(in srgb, var(${colorVar}) 5%, var(--bg-card));border:1px solid color-mix(in srgb, var(${colorVar}) 20%, transparent);" onclick="filterByAgent('${name}')">
+                    <div class="flex items-center gap-2.5 mb-2.5">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb, var(${colorVar}) 12%, transparent);color:var(${colorVar});">
+                            ${agentIcons[iconKey] || ''}
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold" style="color:var(--text-heading);">${escapeHtml(info.label || name)}</div>
+                            <div class="text-[10px]" style="color:var(--text-muted);">${escapeHtml(info.role || '')}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xs font-semibold" style="color:var(${colorVar});">${info.finding_count || 0} findings</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background:color-mix(in srgb, var(${colorVar}) 12%, transparent);color:var(${colorVar});">${confPct}% confidence</span>
+                    </div>
+                </div>`;
+        }
+
+        // Agent filter tabs
+        const agentFilter = document.getElementById('agent-filter');
+        if (agentFilter) {
+            agentFilter.style.display = 'inline-flex';
+            const agentTabs = [{ key: 'all-agents', label: 'All Agents', dot: '' }];
+            for (const [name, info] of Object.entries(agentResults)) {
+                const colorKey = name === 'safety' ? 'red' : name === 'statistics' ? 'blue' : 'green';
+                agentTabs.push({ key: name, label: info.label.replace(' Agent', ''), dot: `var(${agentColors[colorKey]})` });
+            }
+            agentFilter.innerHTML = agentTabs.map(t =>
+                `<button onclick="filterByAgent('${t.key}')" data-agent-filter="${t.key}" class="agent-filter-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-semibold transition-all" style="color:var(--text-muted);">${t.dot ? `<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${t.dot};"></span>` : ''}${t.label}</button>`
+            ).join('');
+            const allBtn = agentFilter.querySelector('[data-agent-filter="all-agents"]');
+            if (allBtn) { allBtn.style.background = 'var(--bg-card)'; allBtn.style.color = 'var(--text-heading)'; allBtn.style.boxShadow = 'var(--shadow-card)'; }
+        }
+    } else if (agentPanel) {
+        agentPanel.classList.add('hidden');
+    }
+
     // Filter tabs (right side of header)
     const filterEl = document.getElementById('findings-filter');
     if (filterEl) {
@@ -509,6 +601,22 @@ function renderResults(data) {
     // Findings count badge
     const fcEl = document.getElementById('findings-count');
     if (fcEl) fcEl.textContent = allFindings.length + ' finding' + (allFindings.length !== 1 ? 's' : '');
+
+    // Trust score badge (hallucination check summary)
+    const trustEl = document.getElementById('trust-score');
+    const verification = data.risk?.verification || {};
+    if (trustEl && verification.total > 0) {
+        const ts = verification.trust_score || 0;
+        const tsColor = ts >= 70 ? 'var(--clinical-green)' : ts >= 40 ? 'var(--clinical-amber)' : 'var(--clinical-red)';
+        const tsBg = ts >= 70 ? 'rgba(5,150,105,0.12)' : ts >= 40 ? 'rgba(217,119,6,0.12)' : 'rgba(239,68,68,0.12)';
+        trustEl.style.display = 'inline-flex';
+        trustEl.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> Trust: ${ts}%`;
+        trustEl.style.color = tsColor;
+        trustEl.style.background = tsBg;
+        trustEl.title = `${verification.verified || 0} verified, ${verification.partial || 0} partial, ${verification.unverified || 0} unverified`;
+    } else if (trustEl) {
+        trustEl.style.display = 'none';
+    }
 
     // ICH-GCP Completeness
     const compEl = document.getElementById('result-completeness');
@@ -535,6 +643,10 @@ function renderResults(data) {
         const ccEl = document.getElementById('completeness-count');
         if (ccEl) ccEl.textContent = presentCount + '/' + coverageEntries.length + ' present';
     }
+
+    // Cross-Document Comparison Panel
+    renderComparisonPanel(data.comparison);
+
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -622,6 +734,13 @@ function renderFindingsCards(findings, container) {
         container.innerHTML = '<p class="text-sm py-6 text-center" style="color:var(--text-muted);">No findings match this filter.</p>';
         return;
     }
+    const agentIcons = {
+        shield: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
+        chart: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+        clipboard: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+    };
+    const agentColorVars = { red: '--clinical-red', blue: '--clinical-blue', green: '--clinical-green' };
+
     findings.forEach((f, idx) => {
         const severity = (f.severity || 'low').toLowerCase();
         const sevVar = severity === 'high' ? '--clinical-red' : severity === 'medium' ? '--clinical-amber' : '--clinical-blue';
@@ -630,8 +749,32 @@ function renderFindingsCards(findings, container) {
         const hasDetails = f.evidence || f.recommendation || f.source_chunk;
         const cardId = 'finding-' + idx;
 
+        // Agent badge
+        const agentIcon = f.agent_icon ? (agentIcons[f.agent_icon] || '') : '';
+        const agentColor = f.agent_color ? (agentColorVars[f.agent_color] || '--clinical-teal') : '--clinical-teal';
+        const agentBadge = f.agent_label
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style="background:color-mix(in srgb, var(${agentColor}) 12%, transparent);color:var(${agentColor});">${agentIcon} ${escapeHtml(f.agent_label)}</span>`
+            : '';
+
+        // Agreement indicator
+        const agreeCount = f.agreement_count || (f.agents_agree ? f.agents_agree.length : 0);
+        const agreeBadge = agreeCount > 1
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold" style="background:rgba(99,102,241,0.1);color:#6366f1;" title="${agreeCount} agents flagged this issue"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${agreeCount}/3 agree</span>`
+            : '';
+
+        // Verification badge (hallucination check)
+        const vStatus = f.verified || '';
+        const vBadgeMap = {
+            verified: { icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>', label: 'Verified', bg: 'rgba(5,150,105,0.1)', color: 'var(--clinical-green)' },
+            partial: { icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg>', label: 'Partial', bg: 'rgba(217,119,6,0.1)', color: 'var(--clinical-amber)' },
+            unverified: { icon: '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>', label: 'Unverified', bg: 'rgba(239,68,68,0.1)', color: 'var(--clinical-red)' },
+        };
+        const vBadge = vBadgeMap[vStatus]
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold" style="background:${vBadgeMap[vStatus].bg};color:${vBadgeMap[vStatus].color};" title="${f.verification_note || ''}">${vBadgeMap[vStatus].icon} ${vBadgeMap[vStatus].label}</span>`
+            : '';
+
         container.innerHTML += `
-            <div class="finding-card rounded-xl transition-all" style="background:var(--bg-card-hover);border:1px solid var(--border-card);border-left:4px solid var(${sevVar});overflow:hidden;">
+            <div class="finding-card rounded-xl transition-all" data-agent="${f.agent || ''}" style="background:var(--bg-card-hover);border:1px solid var(--border-card);border-left:4px solid var(${sevVar});overflow:hidden;">
                 <div class="p-4 cursor-pointer" onclick="toggleFindingDetail('${cardId}')">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 flex flex-col items-center gap-1 mt-0.5" style="min-width:48px;">
@@ -642,6 +785,9 @@ function renderFindingsCards(findings, container) {
                             <p class="text-sm font-semibold leading-snug" style="color:var(--text-heading);">${escapeHtml(f.title || f.finding || f.message || '')}</p>
                             ${f.description ? `<p class="text-xs mt-1.5 leading-relaxed" style="color:var(--text-secondary);">${escapeHtml(f.description)}</p>` : ''}
                             <div class="flex flex-wrap gap-1.5 mt-2">
+                                ${agentBadge}
+                                ${agreeBadge}
+                                ${vBadge}
                                 ${catLabel ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium" style="background:var(--bg-input);color:var(--text-muted);">${escapeHtml(catLabel)}</span>` : ''}
                                 ${f.section_reference ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium" style="background:var(--bg-input);color:var(--text-muted);">\u00A7 ${escapeHtml(f.section_reference)}</span>` : ''}
                                 ${f.source_chunk ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium" style="background:color-mix(in srgb, var(--clinical-teal) 10%, transparent);color:var(--clinical-teal);">\uD83D\uDCC4 ${escapeHtml(f.source_chunk)}</span>` : ''}
@@ -665,6 +811,15 @@ function renderFindingsCards(findings, container) {
                                 <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style="color:var(--clinical-green);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>${escapeHtml(f.recommendation)}</span>
                             </div>
+                        </div>` : ''}
+                        ${f.fix_suggestion ? `
+                        <div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5" style="color:var(--clinical-teal);">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                AI Fix Suggestion
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="background:rgba(20,184,166,0.1);color:var(--clinical-teal);">${f.fix_suggestion.confidence || 'medium'}</span>
+                            </div>
+                            <div class="text-xs leading-relaxed p-3 rounded-lg whitespace-pre-line" style="background:rgba(20,184,166,0.05);border:1px solid rgba(20,184,166,0.15);color:var(--text-secondary);">${escapeHtml(f.fix_suggestion.text)}</div>
                         </div>` : ''}
                         ${f.source_chunk ? `
                         <div class="flex items-center gap-2 text-[10px]" style="color:var(--text-muted);">
@@ -698,7 +853,139 @@ function filterFindings(severity) {
         btn.style.color = isActive ? 'var(--text-heading)' : 'var(--text-muted)';
         btn.style.boxShadow = isActive ? 'var(--shadow-card)' : 'none';
     });
+    // Reset agent filter to "all"
+    document.querySelectorAll('.agent-filter-btn').forEach(btn => {
+        const isAll = btn.dataset.agentFilter === 'all-agents';
+        btn.style.background = isAll ? 'var(--bg-card)' : 'transparent';
+        btn.style.color = isAll ? 'var(--text-heading)' : 'var(--text-muted)';
+        btn.style.boxShadow = isAll ? 'var(--shadow-card)' : 'none';
+    });
 }
+
+function filterByAgent(agent) {
+    const all = window._allFindings || [];
+    const filtered = agent === 'all-agents' ? all : all.filter(f => f.agent === agent);
+    const container = document.getElementById('result-findings');
+    renderFindingsCards(filtered, container);
+    // Update agent filter tabs
+    document.querySelectorAll('.agent-filter-btn').forEach(btn => {
+        const isActive = btn.dataset.agentFilter === agent;
+        btn.style.background = isActive ? 'var(--bg-card)' : 'transparent';
+        btn.style.color = isActive ? 'var(--text-heading)' : 'var(--text-muted)';
+        btn.style.boxShadow = isActive ? 'var(--shadow-card)' : 'none';
+    });
+    // Reset severity filter to "all"
+    document.querySelectorAll('.finding-filter-btn').forEach(btn => {
+        const isAll = btn.dataset.filter === 'all';
+        btn.style.background = isAll ? 'var(--bg-card)' : 'transparent';
+        btn.style.color = isAll ? 'var(--text-heading)' : 'var(--text-muted)';
+        btn.style.boxShadow = isAll ? 'var(--shadow-card)' : 'none';
+    });
+}
+/* ---- Cross-Document Comparison ---- */
+function renderComparisonPanel(comparison) {
+    const panel = document.getElementById('comparison-panel');
+    if (!panel || !comparison || !comparison.documents || comparison.documents.length < 2) {
+        if (panel) panel.classList.add('hidden');
+        return;
+    }
+    panel.classList.remove('hidden');
+
+    // Count badge
+    const countEl = document.getElementById('comparison-count');
+    if (countEl) countEl.textContent = comparison.document_count + ' documents';
+
+    // Trend banner
+    const trendEl = document.getElementById('comparison-trend');
+    const trend = comparison.trend || {};
+    if (trendEl && trend.quality_direction) {
+        trendEl.classList.remove('hidden');
+        const isImproved = trend.quality_direction === 'improved';
+        const trendColor = isImproved ? 'var(--clinical-green)' : trend.quality_direction === 'declined' ? 'var(--clinical-red)' : 'var(--clinical-amber)';
+        const trendIcon = isImproved
+            ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>'
+            : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>';
+        const delta = trend.quality_delta > 0 ? '+' + trend.quality_delta : trend.quality_delta;
+        trendEl.style.background = `color-mix(in srgb, ${trendColor} 6%, var(--bg-card))`;
+        trendEl.style.borderColor = `color-mix(in srgb, ${trendColor} 20%, transparent)`;
+        trendEl.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span style="color:${trendColor};">${trendIcon}</span>
+                <div>
+                    <div class="text-sm font-semibold" style="color:var(--text-heading);">Quality ${trend.quality_direction}: ${delta} points</div>
+                    <div class="text-xs" style="color:var(--text-muted);">${escapeHtml(trend.previous_doc || '')} → ${escapeHtml(trend.current_doc || '')} · ${Math.abs(trend.findings_delta || 0)} ${trend.findings_direction || ''} findings</div>
+                </div>
+            </div>`;
+    } else if (trendEl) {
+        trendEl.classList.add('hidden');
+    }
+
+    // Comparison table
+    const tableEl = document.getElementById('comparison-table');
+    if (tableEl) {
+        const docs = comparison.documents;
+        tableEl.innerHTML = `
+            <table class="w-full text-xs" style="border-collapse:separate;border-spacing:0;">
+                <thead>
+                    <tr>
+                        <th class="text-left py-2 px-3 font-semibold" style="color:var(--text-muted);border-bottom:1px solid var(--border-card);">Metric</th>
+                        ${docs.map(d => `<th class="text-center py-2 px-3 font-semibold" style="color:var(--text-heading);border-bottom:1px solid var(--border-card);">${escapeHtml(d.filename.length > 25 ? d.filename.substring(0, 22) + '...' : d.filename)}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="py-2 px-3" style="color:var(--text-secondary);">Quality Score</td>${docs.map(d => {
+                        const c = d.quality_score >= 70 ? '--clinical-green' : d.quality_score >= 50 ? '--clinical-amber' : '--clinical-red';
+                        return `<td class="text-center py-2 px-3 font-bold" style="color:var(${c});">${d.quality_score} (${d.quality_grade})</td>`;
+                    }).join('')}</tr>
+                    <tr style="background:var(--bg-input);"><td class="py-2 px-3" style="color:var(--text-secondary);">Total Findings</td>${docs.map(d => `<td class="text-center py-2 px-3 font-semibold" style="color:var(--text-heading);">${d.finding_counts?.total || 0}</td>`).join('')}</tr>
+                    <tr><td class="py-2 px-3" style="color:var(--text-secondary);">High / Med / Low</td>${docs.map(d => `<td class="text-center py-2 px-3" style="color:var(--text-secondary);"><span style="color:var(--clinical-red);">${d.finding_counts?.high || 0}</span> / <span style="color:var(--clinical-amber);">${d.finding_counts?.medium || 0}</span> / <span style="color:var(--clinical-blue);">${d.finding_counts?.low || 0}</span></td>`).join('')}</tr>
+                    <tr style="background:var(--bg-input);"><td class="py-2 px-3" style="color:var(--text-secondary);">Trust Score</td>${docs.map(d => `<td class="text-center py-2 px-3 font-semibold" style="color:var(--text-heading);">${d.trust_score || 0}%</td>`).join('')}</tr>
+                    <tr><td class="py-2 px-3" style="color:var(--text-secondary);">Compliance</td>${docs.map(d => `<td class="text-center py-2 px-3 font-semibold" style="color:var(--text-heading);">${d.compliance_pct || 0}%</td>`).join('')}</tr>
+                </tbody>
+            </table>`;
+    }
+
+    // Shared findings
+    const sharedEl = document.getElementById('comparison-shared');
+    const shared = comparison.shared_findings || [];
+    if (sharedEl && shared.length > 0) {
+        sharedEl.innerHTML = `
+            <div class="text-[10px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style="color:var(--clinical-amber);">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                Persistent Issues (found in multiple documents)
+            </div>
+            <div class="space-y-1.5">
+                ${shared.map(s => {
+                    const sevVar = (s.severity || '').toUpperCase() === 'HIGH' ? '--clinical-red' : (s.severity || '').toUpperCase() === 'MEDIUM' ? '--clinical-amber' : '--clinical-blue';
+                    return `<div class="flex items-center gap-2 p-2 rounded-lg text-xs" style="background:var(--bg-input);border:1px solid var(--border-input);">
+                        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:var(${sevVar});"></span>
+                        <span class="flex-1 font-medium" style="color:var(--text-secondary);">${escapeHtml(s.title)}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded font-bold" style="background:rgba(217,119,6,0.1);color:var(--clinical-amber);">${s.count} docs</span>
+                    </div>`;
+                }).join('')}
+            </div>`;
+    } else if (sharedEl) {
+        sharedEl.innerHTML = '';
+    }
+
+    // Unique findings
+    const uniqueEl = document.getElementById('comparison-unique');
+    const unique = comparison.unique_findings || {};
+    if (uniqueEl && Object.keys(unique).length > 0) {
+        let html = '<div class="text-[10px] font-bold uppercase tracking-wider mb-2 mt-3" style="color:var(--text-muted);">Unique Findings per Document</div><div class="grid grid-cols-1 md:grid-cols-2 gap-3">';
+        for (const [filename, items] of Object.entries(unique)) {
+            html += `<div class="p-3 rounded-xl" style="background:var(--bg-input);border:1px solid var(--border-input);">
+                <div class="text-xs font-semibold mb-2" style="color:var(--text-heading);">${escapeHtml(filename.length > 30 ? filename.substring(0, 27) + '...' : filename)}</div>
+                ${items.length > 0 ? items.map(t => `<div class="text-[11px] py-0.5" style="color:var(--text-secondary);">• ${escapeHtml(t)}</div>`).join('') : '<div class="text-[11px]" style="color:var(--text-muted);">No unique findings</div>'}
+            </div>`;
+        }
+        html += '</div>';
+        uniqueEl.innerHTML = html;
+    } else if (uniqueEl) {
+        uniqueEl.innerHTML = '';
+    }
+}
+
 function escapeHtml(str) { const div = document.createElement('div'); div.appendChild(document.createTextNode(str)); return div.innerHTML; }
 
 function showToast(message, type = 'info') {
@@ -723,3 +1010,325 @@ function closeValidationModal() {
 }
 
 window.addEventListener('themechange', () => { if (lastResultData) renderResults(lastResultData); });
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MULTI-DOCUMENT CROSS-COMPARISON
+// ═══════════════════════════════════════════════════════════════════════════
+
+let multiFiles = [];
+
+/* ---- Tab Switching ---- */
+function switchAnalysisTab(tab) {
+    const singleZone = document.getElementById('single-doc-zone');
+    const multiZone = document.getElementById('multi-doc-zone');
+    const tabSingle = document.getElementById('tab-single');
+    const tabMulti = document.getElementById('tab-multi');
+
+    if (tab === 'multi') {
+        singleZone.classList.add('hidden');
+        multiZone.classList.remove('hidden');
+        tabMulti.style.background = 'var(--bg-accent-soft)';
+        tabMulti.style.color = 'var(--text-heading)';
+        tabSingle.style.background = 'transparent';
+        tabSingle.style.color = 'var(--text-muted)';
+    } else {
+        multiZone.classList.add('hidden');
+        singleZone.classList.remove('hidden');
+        tabSingle.style.background = 'var(--bg-accent-soft)';
+        tabSingle.style.color = 'var(--text-heading)';
+        tabMulti.style.background = 'transparent';
+        tabMulti.style.color = 'var(--text-muted)';
+    }
+}
+
+/* ---- Multi-file Drop Zone ---- */
+document.addEventListener('DOMContentLoaded', () => {
+    const mDropZone = document.getElementById('multi-drop-zone');
+    const mInput = document.getElementById('multi-file-input');
+    if (!mDropZone || !mInput) return;
+
+    mDropZone.addEventListener('click', () => mInput.click());
+    mDropZone.addEventListener('dragover', (e) => { e.preventDefault(); mDropZone.classList.add('drop-zone-active'); });
+    mDropZone.addEventListener('dragleave', () => mDropZone.classList.remove('drop-zone-active'));
+    mDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        mDropZone.classList.remove('drop-zone-active');
+        addMultiFiles(Array.from(e.dataTransfer.files));
+    });
+    mInput.addEventListener('change', () => {
+        addMultiFiles(Array.from(mInput.files));
+        mInput.value = '';
+    });
+});
+
+function addMultiFiles(files) {
+    const allowed = ['.pdf', '.docx', '.txt'];
+    for (const f of files) {
+        const ext = f.name.substring(f.name.lastIndexOf('.')).toLowerCase();
+        if (!allowed.includes(ext)) {
+            showToast('Unsupported file: ' + f.name, 'error');
+            continue;
+        }
+        if (multiFiles.length >= 5) {
+            showToast('Maximum 5 documents', 'error');
+            break;
+        }
+        if (multiFiles.some(mf => mf.name === f.name && mf.size === f.size)) continue;
+        multiFiles.push(f);
+    }
+    renderMultiFileList();
+}
+
+function removeMultiFile(index) {
+    multiFiles.splice(index, 1);
+    renderMultiFileList();
+}
+
+function clearMultiFiles() {
+    multiFiles = [];
+    renderMultiFileList();
+}
+
+function renderMultiFileList() {
+    const listEl = document.getElementById('multi-file-list');
+    const actionEl = document.getElementById('multi-action');
+    const countEl = document.getElementById('multi-file-count');
+
+    if (multiFiles.length === 0) {
+        listEl.classList.add('hidden');
+        actionEl.classList.add('hidden');
+        return;
+    }
+
+    listEl.classList.remove('hidden');
+    actionEl.classList.remove('hidden');
+    countEl.textContent = multiFiles.length + ' document' + (multiFiles.length > 1 ? 's' : '') + ' selected';
+
+    const typeIcons = { '.pdf': '📕', '.docx': '📘', '.txt': '📝' };
+    listEl.innerHTML = multiFiles.map((f, i) => {
+        const ext = f.name.substring(f.name.lastIndexOf('.')).toLowerCase();
+        return `<div class="flex items-center justify-between p-3 rounded-xl border" style="background:var(--bg-card-hover);border-color:var(--border-card);">
+            <div class="flex items-center gap-3">
+                <span class="text-lg">${typeIcons[ext] || '📄'}</span>
+                <div>
+                    <div class="text-xs font-semibold" style="color:var(--text-heading);">${escapeHtml(f.name)}</div>
+                    <div class="text-[10px]" style="color:var(--text-muted);">${formatSize(f.size)}</div>
+                </div>
+            </div>
+            <button onclick="removeMultiFile(${i})" class="text-xs px-2 py-1 rounded-lg transition hover:opacity-70" style="color:var(--clinical-red);">✕</button>
+        </div>`;
+    }).join('');
+}
+
+/* ---- Run Cross-Document Comparison ---- */
+async function runMultiDocCompare() {
+    if (multiFiles.length < 2) {
+        showToast('Upload at least 2 documents to compare', 'error');
+        return;
+    }
+
+    const demoMode = document.getElementById('demo-toggle').checked;
+    const model = document.getElementById('model-select').value;
+    const user = JSON.parse(localStorage.getItem('clindoc_user') || '{}');
+
+    // Show progress overlay
+    const progressSection = document.getElementById('progress-section');
+    const uploadSection = document.getElementById('upload-section');
+    const resultsSection = document.getElementById('results-section');
+    resultsSection.classList.add('hidden');
+    progressSection.classList.remove('hidden');
+
+    analysisAbortController = new AbortController();
+    analysisStartTime = performance.now();
+
+    // Timeout: auto-abort after 3 minutes to avoid infinite hang
+    const compareTimeout = setTimeout(() => {
+        if (analysisAbortController) analysisAbortController.abort();
+    }, 180000);
+
+    startPipelineAnimation(demoMode);
+
+    try {
+        const form = new FormData();
+        for (const f of multiFiles) form.append('files', f);
+        form.append('demo_mode', demoMode ? 'true' : 'false');
+        form.append('model', model);
+        if (user.id) form.append('user_id', user.id);
+
+        const res = await fetch('/api/analysis/compare', {
+            method: 'POST',
+            body: form,
+            signal: analysisAbortController.signal,
+        });
+
+        clearTimeout(compareTimeout);
+
+        let data;
+        try { data = await res.json(); } catch { data = { detail: 'Server error' }; }
+
+        stopPipelineAnimation(res.ok && data.success);
+
+        if (res.ok && data.success) {
+            setTimeout(() => {
+                progressSection.classList.add('hidden');
+                uploadSection.classList.add('hidden');
+                renderCrossDocResults(data);
+            }, 800);
+        } else {
+            progressSection.classList.add('hidden');
+            showToast(data.detail || 'Comparison failed', 'error');
+        }
+    } catch (err) {
+        clearTimeout(compareTimeout);
+        stopPipelineAnimation(false);
+        progressSection.classList.add('hidden');
+        if (err.name === 'AbortError') {
+            showToast('Comparison timed out or was cancelled.', 'info');
+        } else {
+            showToast('Comparison failed: ' + err.message, 'error');
+        }
+    }
+}
+
+function backToUpload() {
+    document.getElementById('cross-doc-results').classList.add('hidden');
+    document.getElementById('upload-section').classList.remove('hidden');
+}
+
+/* ---- Render Cross-Document Comparison Results ---- */
+function renderCrossDocResults(data) {
+    const section = document.getElementById('cross-doc-results');
+    section.classList.remove('hidden');
+
+    const risk = data.risk_score || {};
+    const scoreColor = risk.score >= 70 ? '--clinical-green' : risk.score >= 50 ? '--clinical-amber' : '--clinical-red';
+
+    // Risk banner
+    document.getElementById('xdoc-score-badge').textContent = (risk.grade || '—');
+    document.getElementById('xdoc-score-badge').style.color = `var(${scoreColor})`;
+    document.getElementById('xdoc-score-badge').style.background = `color-mix(in srgb, var(${scoreColor}) 10%, var(--bg-card))`;
+    document.getElementById('xdoc-score-label').textContent = `Score: ${risk.score ?? 0}/100 — ${risk.label || ''}`;
+    document.getElementById('xdoc-doc-count').textContent = data.document_count || 0;
+    document.getElementById('xdoc-issue-count').textContent = data.total_issues || 0;
+
+    // Severity pills
+    const ic = data.issue_counts || {};
+    document.getElementById('xdoc-severity-pills').innerHTML = `
+        <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:color-mix(in srgb, var(--clinical-red) 12%, var(--bg-card));color:var(--clinical-red);">
+            ${ic.HIGH || 0} High
+        </span>
+        <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:color-mix(in srgb, var(--clinical-amber) 12%, var(--bg-card));color:var(--clinical-amber);">
+            ${ic.MEDIUM || 0} Medium
+        </span>
+        <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:color-mix(in srgb, var(--clinical-blue) 12%, var(--bg-card));color:var(--clinical-blue);">
+            ${ic.LOW || 0} Low
+        </span>`;
+
+    // Per-document summary cards
+    const docs = data.documents || [];
+    const grid = document.getElementById('xdoc-summaries-grid');
+    grid.innerHTML = docs.map(d => {
+        const qColor = (d.quality_score || 0) >= 70 ? '--clinical-green' : (d.quality_score || 0) >= 50 ? '--clinical-amber' : '--clinical-red';
+        const fc = d.finding_counts || {};
+        return `<div class="rounded-xl border p-4" style="background:var(--bg-input);border-color:var(--border-input);">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-bold truncate" style="color:var(--text-heading);" title="${escapeHtml(d.filename || '')}">${escapeHtml((d.filename || '').length > 28 ? (d.filename || '').substring(0, 25) + '...' : (d.filename || ''))}</div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold" style="background:color-mix(in srgb, #6366f1 10%, var(--bg-card));color:#6366f1;">${escapeHtml(d.doc_type || '')}</span>
+            </div>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="text-xl font-black" style="color:var(${qColor});">${d.quality_score || 0}<span class="text-xs font-normal">/100</span></div>
+                <span class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:color-mix(in srgb, var(${qColor}) 10%, var(--bg-card));color:var(${qColor});">${d.quality_grade || '—'}</span>
+            </div>
+            <div class="text-[10px] mb-2" style="color:var(--text-secondary);">
+                Findings: <span style="color:var(--clinical-red);">${fc.high || 0}H</span> /
+                <span style="color:var(--clinical-amber);">${fc.medium || 0}M</span> /
+                <span style="color:var(--clinical-blue);">${fc.low || 0}L</span>
+            </div>
+            <div class="text-[11px] leading-relaxed" style="color:var(--text-muted);">${escapeHtml((d.summary || '').substring(0, 150))}${(d.summary || '').length > 150 ? '...' : ''}</div>
+        </div>`;
+    }).join('');
+
+    // Pairwise comparison tables
+    const pairwise = data.pairwise_comparisons || [];
+    const pairContainer = document.getElementById('xdoc-pairwise');
+    pairContainer.innerHTML = pairwise.map((pair, pi) => {
+        const issues = pair.issues || [];
+        const comparisons = pair.field_comparisons || [];
+        const issueCount = issues.length;
+
+        return `<div class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">⚖️</span>
+                    <h3 class="text-sm font-bold" style="color:var(--text-heading);">
+                        ${escapeHtml(pair.doc_a_type || pair.doc_a || '')} vs ${escapeHtml(pair.doc_b_type || pair.doc_b || '')}
+                    </h3>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:${issueCount > 0 ? 'color-mix(in srgb, var(--clinical-red) 10%, var(--bg-card))' : 'color-mix(in srgb, var(--clinical-green) 10%, var(--bg-card))'};color:${issueCount > 0 ? 'var(--clinical-red)' : 'var(--clinical-green)'};">
+                    ${issueCount > 0 ? issueCount + ' issue' + (issueCount > 1 ? 's' : '') : 'All clear'}
+                </span>
+            </div>
+
+            <!-- Field comparison table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs" style="border-collapse:separate;border-spacing:0;">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-2 px-3 font-semibold" style="color:var(--text-muted);border-bottom:1px solid var(--border-card);width:130px;">Field</th>
+                            <th class="text-center py-2 px-3 font-semibold" style="color:var(--text-muted);border-bottom:1px solid var(--border-card);width:60px;">Status</th>
+                            <th class="text-left py-2 px-3 font-semibold" style="color:var(--text-heading);border-bottom:1px solid var(--border-card);">${escapeHtml(pair.doc_a_type || 'Doc A')}</th>
+                            <th class="text-left py-2 px-3 font-semibold" style="color:var(--text-heading);border-bottom:1px solid var(--border-card);">${escapeHtml(pair.doc_b_type || 'Doc B')}</th>
+                            <th class="text-left py-2 px-3 font-semibold" style="color:var(--text-muted);border-bottom:1px solid var(--border-card);">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${comparisons.map((c, ci) => {
+                            const statusStyles = {
+                                match: { bg: 'var(--clinical-green)', icon: '✓', label: 'Match' },
+                                minor_diff: { bg: 'var(--clinical-amber)', icon: '~', label: 'Minor' },
+                                mismatch: { bg: 'var(--clinical-red)', icon: '✗', label: 'Mismatch' },
+                                missing: { bg: 'var(--clinical-red)', icon: '!', label: 'Missing' },
+                            };
+                            const st = statusStyles[c.status] || statusStyles.mismatch;
+                            const rowBg = ci % 2 === 1 ? 'background:var(--bg-input);' : '';
+                            const sevColor = (c.severity || '').toUpperCase() === 'HIGH' ? '--clinical-red'
+                                : (c.severity || '').toUpperCase() === 'MEDIUM' ? '--clinical-amber' : '--clinical-blue';
+
+                            return `<tr style="${rowBg}">
+                                <td class="py-2 px-3 font-semibold" style="color:var(--text-secondary);">${escapeHtml(c.field || '')}</td>
+                                <td class="text-center py-2 px-3">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style="background:${st.bg};">${st.icon} ${st.label}</span>
+                                </td>
+                                <td class="py-2 px-3 text-[11px]" style="color:var(--text-secondary);max-width:200px;word-wrap:break-word;">${escapeHtml(c.doc_a_value || '—')}</td>
+                                <td class="py-2 px-3 text-[11px]" style="color:var(--text-secondary);max-width:200px;word-wrap:break-word;">${escapeHtml(c.doc_b_value || '—')}</td>
+                                <td class="py-2 px-3 text-[11px]" style="color:var(--text-muted);">
+                                    ${c.status !== 'match' ? `<span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background:var(${sevColor});"></span>` : ''}
+                                    ${escapeHtml(c.detail || '')}
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+
+            ${issues.length > 0 ? `
+            <div class="mt-4 pt-3 border-t" style="border-color:var(--border-card);">
+                <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color:var(--clinical-red);">Issues Found</div>
+                <div class="space-y-1.5">
+                    ${issues.map(iss => {
+                        const sevVar = (iss.severity || '').toUpperCase() === 'HIGH' ? '--clinical-red' : (iss.severity || '').toUpperCase() === 'MEDIUM' ? '--clinical-amber' : '--clinical-blue';
+                        return `<div class="flex items-start gap-2 p-2 rounded-lg text-xs" style="background:var(--bg-input);border:1px solid var(--border-input);">
+                            <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1" style="background:var(${sevVar});"></span>
+                            <div class="flex-1">
+                                <span class="font-semibold" style="color:var(--text-heading);">${escapeHtml(iss.field || '')}</span>
+                                <span class="text-[10px] ml-1 px-1.5 py-0.5 rounded font-bold" style="color:var(${sevVar});">${iss.severity || ''}</span>
+                                <div class="text-[11px] mt-0.5" style="color:var(--text-muted);">${escapeHtml(iss.detail || '')}</div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+}

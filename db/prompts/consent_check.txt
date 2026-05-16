@@ -1,21 +1,53 @@
-Analyze this informed consent form (ICF) section. Extract key elements and check completeness per ICH-GCP E6(R2) Section 4.8.
+Analyze this informed consent form (ICF) section. Check completeness against all **ICH-GCP E6(R2) Section 4.8.10** required elements (a through u).
+
+The 21 required elements per ICH-GCP 4.8.10:
+(a) Statement that study involves research
+(b) Purpose of the trial
+(c) Trial treatments & probability of random assignment
+(d) Study procedures to be followed
+(e) Subject's responsibilities
+(f) Experimental aspects of the trial
+(g) Foreseeable risks and discomforts
+(h) Expected benefits
+(i) Alternative procedures or treatments
+(j) Compensation/treatment for trial-related injury
+(k) Payment and proration for participation
+(l) Anticipated expenses to the subject
+(m) Voluntary participation & right to withdraw
+(n) Access by monitors, auditors, IRB/IEC
+(o) Confidentiality of records
+(p) Notification of new information
+(q) Contact persons for questions about trial
+(r) Contact persons for questions about subject rights
+(s) Foreseeable circumstances for termination
+(t) Expected duration of participation
+(u) Approximate number of subjects
 
 Return ONLY valid JSON:
 
 {
   "consent_elements": {
-    "study_purpose": {"status":"present|partial|missing|unknown","evidence":""},
-    "procedures_described": {"status":"present|partial|missing|unknown","evidence":""},
-    "duration_stated": {"status":"present|partial|missing|unknown","evidence":""},
-    "risks_disclosed": {"status":"present|partial|missing|unknown","evidence":""},
-    "benefits_described": {"status":"present|partial|missing|unknown","evidence":""},
-    "alternatives_mentioned": {"status":"present|partial|missing|unknown","evidence":""},
-    "confidentiality_addressed": {"status":"present|partial|missing|unknown","evidence":""},
-    "voluntary_participation": {"status":"present|partial|missing|unknown","evidence":""},
-    "withdrawal_rights": {"status":"present|partial|missing|unknown","evidence":""},
-    "compensation_mentioned": {"status":"present|partial|missing|unknown","evidence":""},
-    "contact_information": {"status":"present|partial|missing|unknown","evidence":""},
-    "irb_information": {"status":"present|partial|missing|unknown","evidence":""}
+    "study_is_research_a": {"status":"present|partial|missing|unknown","evidence":""},
+    "study_purpose_b": {"status":"present|partial|missing|unknown","evidence":""},
+    "treatments_randomization_c": {"status":"present|partial|missing|unknown","evidence":""},
+    "procedures_d": {"status":"present|partial|missing|unknown","evidence":""},
+    "responsibilities_e": {"status":"present|partial|missing|unknown","evidence":""},
+    "experimental_aspects_f": {"status":"present|partial|missing|unknown","evidence":""},
+    "risks_g": {"status":"present|partial|missing|unknown","evidence":""},
+    "benefits_h": {"status":"present|partial|missing|unknown","evidence":""},
+    "alternatives_i": {"status":"present|partial|missing|unknown","evidence":""},
+    "compensation_injury_j": {"status":"present|partial|missing|unknown","evidence":""},
+    "payment_k": {"status":"present|partial|missing|unknown","evidence":""},
+    "expenses_l": {"status":"present|partial|missing|unknown","evidence":""},
+    "voluntary_withdrawal_m": {"status":"present|partial|missing|unknown","evidence":""},
+    "monitor_auditor_access_n": {"status":"present|partial|missing|unknown","evidence":""},
+    "confidentiality_o": {"status":"present|partial|missing|unknown","evidence":""},
+    "new_information_p": {"status":"present|partial|missing|unknown","evidence":""},
+    "contact_questions_q": {"status":"present|partial|missing|unknown","evidence":""},
+    "contact_rights_r": {"status":"present|partial|missing|unknown","evidence":""},
+    "termination_circumstances_s": {"status":"present|partial|missing|unknown","evidence":""},
+    "duration_t": {"status":"present|partial|missing|unknown","evidence":""},
+    "number_of_subjects_u": {"status":"present|partial|missing|unknown","evidence":""}
   },
 
   "readability": {
@@ -38,7 +70,8 @@ Return ONLY valid JSON:
 }
 
 RULES:
-- Follow ICH-GCP Section 4.8
+- Follow ICH-GCP 4.8.10 elements (a) through (u)
+- Reference specific sub-elements (e.g., "4.8.10(j) — Compensation for injury")
 - If element is missing → HIGH severity
 - If partially described → MEDIUM severity
 - If not identifiable in this chunk → mark as "unknown"

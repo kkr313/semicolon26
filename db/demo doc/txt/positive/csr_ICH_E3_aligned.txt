@@ -1,0 +1,258 @@
+CLINICAL STUDY REPORT
+
+ 
+Name of Sponsor/Company:
+Name of Finished Product:
+Name of Active Ingredient:
+ 
+NovaCura Biotech CLN-201
+CLN-201
+ 
+Study Title:	A Phase II, Randomized, Double-Blind, Placebo-Controlled, Multicenter Study to Evaluate the Efficacy, Safety, and Tolerability of CLN-201 in Adult Participants With Moderate Inflammatory Disease
+Protocol Number:	CLN-201-2026-01
+Development Phase:	Phase II
+Report Version:	1.0
+Report Date:	2026-05-16
+
+
+
+Table of Contents
+
+1.	Synopsis
+2.	Table of Contents
+3.	List of Abbreviations and Definition of Terms
+4.	Ethics
+5.	Investigators and Administrative Structure
+6.	Introduction
+7.	Study Objectives
+8.	Investigational Plan
+1.	Overall Study Design and Plan
+2.	Discussion of Study Design, Including Choice of Control Groups
+3.	Selection of Study Population
+4.	Treatments
+ 
+5.	Efficacy and Safety Variables
+6.	Data Quality Assurance
+7.	Statistical Methods Planned in the Protocol and Determination of Sample Size
+8.	Changes in the Conduct of the Study or Planned Analyses
+9.	Study Patients
+1.	Disposition of Patients
+2.	Protocol Deviations
+10.	Efficacy Evaluation
+1.	Data Sets Analyzed
+2.	Demographic and Other Baseline Characteristics
+3.	Measurements of Treatment Compliance
+4.	Efficacy Results and Tabulations
+11.	Safety Evaluation
+1.	Extent of Exposure
+2.	Adverse Events
+3.	Deaths, Other Serious Adverse Events, and Other Significant Adverse Events
+4.	Clinical Laboratory Evaluation
+5.	Vital Signs, Physical Findings, and Other Observations Related to Safety
+12.	Discussion and Overall Conclusions
+13.	Tables, Figures, and Graphs Referred to but Not Included in the Text
+14.	Reference List
+15.	Appendices
+
+List of Abbreviations and Definition of Terms
+
+
+Abbreviation	Definition
+AE	Adverse Event
+CSR	Clinical Study Report
+GCP	Good Clinical Practice
+ICH	International Council for Harmonisation
+IRB/IEC	Institutional Review Board / Independent Ethics Committee
+SAE	Serious Adverse Event
+SAP	Statistical Analysis Plan
+ 
+1.	Synopsis
+
+
+Item	Description
+Name of Sponsor/Company	NovaCura Biotech
+Study Title	A Phase II, Randomized, Double-Blind, Placebo-Controlled, Multicenter Study to Evaluate the Efficacy, Safety, and Tolerability of CLN-201 in Adult Participants With Moderate Inflammatory Disease
+Protocol Number	CLN-201-2026-01
+Study Phase	Phase II
+Study Design	Randomized, double-blind, placebo-controlled, parallel-group, multicenter study.
+Study Population	Adults 18 to 75 years of age with moderate inflammatory disease and stable background therapy where applicable.
+Participants	Screened: 148; Randomized: 120; Completed treatment: 110;
+Discontinued early: 10.
+Treatment Groups	CLN-201 once daily; matching placebo once daily.
+Study Duration	Screening up to 21 days; Treatment 12 weeks; Follow-up 4 weeks.
+Primary Objective	To evaluate the efficacy of CLN-201 compared with placebo in reducing disease activity from baseline to Week 12.
+Primary Endpoint	Change from baseline to Week 12 in disease activity score.
+Efficacy Summary	CLN-201 demonstrated greater improvement than placebo in the primary endpoint, with favorable trends in secondary endpoints.
+Safety Summary	CLN-201 was generally well tolerated. No new major safety signals were identified.
+Conclusion	The study met its primary objective and supports continued clinical development of CLN-201.
+
+2.	Ethics
+
+ 
+The study was conducted in accordance with the ethical principles originating in the Declaration of Helsinki, ICH Good Clinical Practice, and applicable local regulatory requirements.
+Approval from the relevant Institutional Review Board or Independent Ethics Committee was obtained before initiation of study-specific procedures at each participating site.
+Written informed consent was obtained from each participant before the conduct of any study- specific procedures.
+
+
+3.	Investigators and Administrative Structure
+
+This multicenter study was conducted at qualified investigational sites under the supervision of appropriately trained investigators.
+
+
+4.	Introduction
+
+CLN-201 is an investigational product under development for the treatment of inflammatory disease. This study was designed to evaluate the efficacy, safety, and tolerability of CLN-201 in adult participants with moderate inflammatory disease.
+The rationale for the study was based on the need for improved therapeutic options and prior evidence suggesting potential clinical benefit of CLN-201 in reducing disease activity.
+
+
+5.	Study Objectives
+
+5.1	Primary Objective
+To evaluate the efficacy of CLN-201 compared with placebo in reducing disease activity from baseline to Week 12.
+5.2	Secondary Objectives
+  To further assess the effect of CLN-201 on symptoms of inflammatory disease.
+ 
+  To evaluate the effect of CLN-201 on inflammatory biomarkers, including C-reactive protein.
+  To assess quality-of-life outcomes and clinical response criteria.   To evaluate the safety and tolerability of CLN-201.
+
+6.	Investigational Plan
+
+6.1	Overall Study Design and Plan
+This was a randomized, double-blind, placebo-controlled, parallel-group, multicenter Phase II study. Eligible participants were randomized in a 1:1 ratio to receive CLN-201 or matching placebo orally once daily for 12 weeks.
+Assessments were performed during screening, baseline, Weeks 2, 4, 8, and 12, and at follow-up approximately 4 weeks after the last dose.
+6.2	Discussion of Study Design, Including Choice of Control Groups
+A placebo-controlled design was selected to provide an unbiased assessment of the efficacy and safety of CLN-201 while minimizing confounding influences. Blinding and randomization were used to reduce bias in efficacy and safety assessments.
+
+6.3	Selection of Study Population
+
+Inclusion Criteria
+  Adults 18 to 75 years of age.
+  Diagnosis of moderate inflammatory disease as defined in the protocol.   Stable background therapy where applicable.
+  Able and willing to provide written informed consent.
+
+Exclusion Criteria
+  Any clinically significant condition that could interfere with study participation or interpretation of results.
+  Relevant uncontrolled comorbidities or active infection.   Other protocol-defined exclusions.
+
+
+6.4	Treatments
+Participants received CLN-201 once daily or matching placebo once daily for 12 weeks.
+ 
+
+ 
+6.5	Efficacy and Safety Variables
+
+Efficacy Variables
+  Primary efficacy variable: Change from baseline to Week 12 in disease activity score.
+  Secondary efficacy variables: Symptom improvement, inflammatory biomarker changes, quality-of-life outcomes, and clinical response rates at Week 12.
+Safety Variables
+  Adverse events and serious adverse events   Clinical laboratory parameters
+  Vital signs
+  Physical examination findings
+  Other protocol-specified safety assessments
+
+6.6	Data Quality Assurance
+Data were reviewed using standard quality control procedures to support completeness, consistency, and accuracy.
+
+
+6.7	Statistical Methods Planned in the Protocol and Determination of Sample Size
+The primary analysis compared change from baseline to Week 12 in disease activity score between the CLN-201 and placebo groups.
+
+
+6.8	Changes in the Conduct of the Study or Planned Analyses
+No major deviations from the overall planned study conduct are described in this draft report.
+
+ 
+7.	Study Patients
+
+7.1	Disposition of Patients
+A total of 148 participants were screened and 120 were randomized. Of the randomized participants, 110 completed treatment and 10 discontinued early.
+
+Disposition Category	Count
+Screened	148
+Randomized	120
+Completed Treatment	110
+Discontinued Early	10
+Reasons for early discontinuation included adverse events, withdrawal of consent, loss to follow- up, or investigator decision.
+7.2	Protocol Deviations
+
+
+8.	Efficacy Evaluation
+
+8.1	Data Sets Analyzed
+
+
+8.2	Demographic and Other Baseline Characteristics
+Demographic and baseline characteristics were generally balanced between treatment groups. The mean age was 46 years and 62% of participants were female.
+
+
+8.3	Measurements of Treatment Compliance
+ 
+
+ 
+8.4	Efficacy Results and Tabulations
+
+Primary Efficacy Result
+At Week 12, participants treated with CLN-201 showed greater improvement in disease activity score than placebo.
+
+Measure	CLN-201	Placebo
+Mean change from baseline to Week 12 in disease activity score	-3.8	-2.1
+Treatment difference: -1.7 in favor of CLN-201.
+
+Secondary Efficacy Results
+  Greater symptom improvement with CLN-201
+  Reduction in inflammatory biomarkers including C-reactive protein   Improved quality-of-life outcomes
+  Higher proportion meeting clinical response criteria at Week 12
+
+ 
+
+9.	Safety Evaluation
+
+9.1	Extent of Exposure
+
+
+9.2	Adverse Events
+Overall, CLN-201 was generally well tolerated. Most adverse events were mild to moderate.
+
+Safety Measure	CLN-201	Placebo
+Participants with at least one adverse event	38%	31%
+Serious adverse events	2%	1%
+Most common adverse events:
+  Headache   Nausea
+  Fatigue
+
+9.3	Deaths, Other Serious Adverse Events, and Other Significant Adverse Events
+No new major safety signals were identified.
+
+
+9.4	Clinical Laboratory Evaluation
+Routine laboratory tests did not reveal clinically meaningful treatment-related safety concerns.
+
+
+9.5	Vital Signs, Physical Findings, and Other Observations Related to Safety
+Vital signs and physical examination findings did not reveal clinically meaningful treatment- related safety concerns.
+
+ 
+10.	Discussion and Overall Conclusions
+
+This Phase II study met its primary objective. CLN-201 improved disease activity compared with placebo over 12 weeks. Secondary endpoints were generally supportive of benefit. The safety profile was acceptable and consistent with prior knowledge of the investigational product.
+Overall, these findings support continued clinical development of CLN-201.
+
+
+11.	Tables, Figures, and Graphs Referred to but Not Included in the Text
+
+  Participant disposition figure   Baseline characteristics table
+  Primary endpoint statistical output table   Secondary endpoint summary tables
+  Treatment-emergent adverse event summary tables   Laboratory summary tables
+
+12.	Reference List
+
+
+
+13.	Appendices
+
+Study protocol and amendments Sample case report form
+List of investigators and study administrative structure
+Ethics committee information and representative written information for patient informed consent
+Statistical analysis plan Patient data listings Summary tables
+Safety listings

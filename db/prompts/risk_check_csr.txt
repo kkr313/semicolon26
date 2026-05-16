@@ -1,10 +1,23 @@
-Review this Clinical Study Report (CSR) section based on ICH E3 guidelines.
+Review this Clinical Study Report (CSR) section based on **ICH E3** (Structure and Content of Clinical Study Reports).
+
+ICH E3 defines the required structure for CSRs. Check against these key sections:
+- Section 2 Synopsis
+- Section 5 Ethics (IRB/IEC approval, informed consent)
+- Section 6 Investigators & Study Sites
+- Section 8 Study Objectives
+- Section 9 Investigational Plan (design, treatments, efficacy/safety variables, statistical methods)
+- Section 10 Study Patients (disposition, demographics, baseline, protocol deviations)
+- Section 11 Efficacy Evaluation (primary & secondary endpoints, responder analyses)
+- Section 12 Safety Evaluation (AEs, SAEs, deaths, labs, vitals, ECGs)
+- Section 13 Discussion & Overall Conclusions (benefit-risk interpretation)
+- Section 14 Tables, Figures, Graphs
+- Section 16 Appendices (CRFs, protocol amendments, patient data listings)
 
 Check for:
-- Missing or incomplete required content
+- Missing or incomplete required content per E3 structure
 - Inconsistencies between results and conclusions
-- Statistical reporting gaps
-- Safety data completeness
+- Statistical reporting gaps (missing CIs, p-values, effect sizes)
+- Safety data completeness (AE tables, SAE narratives, deaths)
 - Regulatory compliance issues
 
 Return ONLY valid JSON:
@@ -26,6 +39,7 @@ Return ONLY valid JSON:
 
 RULES:
 - Follow ICH E3 structure and expectations
+- Reference ICH E3 section numbers (e.g., "E3 Section 12 — Safety Evaluation")
 - HIGH severity: issues affecting safety, data integrity, or regulatory approval
 - MEDIUM severity: incomplete or unclear reporting
 - LOW severity: minor clarity or formatting issues

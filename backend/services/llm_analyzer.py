@@ -13,16 +13,23 @@ from pathlib import Path
 
 from openai import OpenAI
 
-from backend.config import LLM_GATEWAY_URL, LLM_API_KEY, LLM_MODEL, PROMPTS_DIR
+from backend.config import (
+    LLM_GATEWAY_URL, LLM_API_KEY, LLM_MODEL, PROMPTS_DIR,
+    LLM_SYSTEM_PROMPT, LLM_TOP_P, LLM_FREQUENCY_PENALTY,
+    LLM_PRESENCE_PENALTY, LLM_REQUEST_TIMEOUT, LLM_MAX_INPUT_CHARS,
+    LLM_TEMPERATURE_EXTRACTION, LLM_TEMPERATURE_ANALYSIS,
+    LLM_TEMPERATURE_SUMMARIZE, LLM_MAX_TOKENS_SHORT, LLM_MAX_TOKENS_MEDIUM,
+    LLM_MAX_TOKENS_LONG, LLM_MAX_TOKENS_SUMMARY,
+)
 
 GATEWAY_URL = LLM_GATEWAY_URL
 API_KEY = LLM_API_KEY
 
 AVAILABLE_MODELS = [
-    "gpt-4.1",
-    "gpt-4.1-nano",
-    "o3-mini",
-    "gpt-4o",
+    "gpt-4.1",           # Default — best for clinical analysis & JSON output
+    "gpt-4.1-nano",      # Fast fallback, lower cost
+    "gpt-4o",            # Strong general-purpose
+    "o3-mini",           # Good reasoning, slower
     "anthropic.claude-sonnet-4",
     "gpt-5.1-CIO",
     "gpt-5.2-CIO",
@@ -35,7 +42,12 @@ AVAILABLE_MODELS = [
 DEFAULT_MODEL = LLM_MODEL
 
 # Initialise the OpenAI client pointing at the gateway
-_client = OpenAI(base_url=GATEWAY_URL, api_key=API_KEY)
+_client = OpenAI(
+    base_url=GATEWAY_URL,
+    api_key=API_KEY,
+    timeout=LLM_REQUEST_TIMEOUT,       # Per-request timeout (seconds)
+    max_retries=2,                      # Auto-retry on transient errors
+)
 
 # ── Token Tracking ─────────────────────────────────────────────────────────
 
@@ -98,9 +110,36 @@ def check_api_status() -> dict:
         return {"online": False, "models": [], "error": str(e)}
 
 
-def call_llm(prompt: str, model: str = DEFAULT_MODEL, temperature: float = 0.2, max_tokens: int = 2048) -> str:
-    """Send a prompt to the LLM gateway with caching, fallback, and token tracking."""
-    # Check cache first
+def call_llm(
+    prompt: str,
+    model: str = DEFAULT_MODEL,
+    temperature: float = LLM_TEMPERATURE_ANALYSIS,
+    max_tokens: int = LLM_MAX_TOKENS_LONG,
+    system_prompt: str | None = None,
+    top_p: float = LLM_TOP_P,
+    frequency_penalty: float = LLM_FREQUENCY_PENALTY,
+    presence_penalty: float = LLM_PRESENCE_PENALTY,
+    response_format: str | None = None,
+) -> str:
+    """
+    Send a prompt to the LLM gateway with best-practice defaults.
+
+    Best practices applied:
+    - System prompt: sets a consistent clinical-expert persona
+    - Temperature: tuned per task type (0.0 extraction, 0.15 analysis, 0.2 summary)
+    - Top-p (nucleus sampling): 0.95 for focused but not repetitive output
+    - Frequency/presence penalty: prevents response repetition loops
+    - Input truncation: auto-trims prompt to stay within context window
+    - Caching: SHA-256 keyed by model+prompt to avoid redundant calls
+    - Fallback chain: tries multiple models on failure
+    - Timeout: per-request timeout configured at client level
+    - Max retries: auto-retries on transient network errors
+    """
+    # ── Input truncation — keep prompt within context window ──────────────
+    if len(prompt) > LLM_MAX_INPUT_CHARS:
+        prompt = prompt[:LLM_MAX_INPUT_CHARS] + "\n\n[...truncated for context limit...]"
+
+    # ── Check cache first ────────────────────────────────────────────────
     key = _cache_key(prompt, model)
     if key in _response_cache:
         _token_usage["cache_hits"] = _token_usage.get("cache_hits", 0) + 1
@@ -108,7 +147,15 @@ def call_llm(prompt: str, model: str = DEFAULT_MODEL, temperature: float = 0.2, 
             _token_usage.setdefault("models_used", []).append("(cached)")
         return _response_cache[key]
 
-    fallback_models = [model, "gpt-4.1-nano", "gpt-4o", "o3-mini", "gemini-2.5-flash-lite"]
+    # ── Build messages with system prompt ────────────────────────────────
+    sys_prompt = system_prompt or LLM_SYSTEM_PROMPT
+    messages = [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": prompt},
+    ]
+
+    # ── Fallback chain ───────────────────────────────────────────────────
+    fallback_models = [model, "gpt-4.1", "gpt-4.1-nano", "gpt-4o", "o3-mini", "gemini-2.5-flash-lite"]
     seen = set()
     models_to_try = []
     for m in fallback_models:
@@ -116,17 +163,31 @@ def call_llm(prompt: str, model: str = DEFAULT_MODEL, temperature: float = 0.2, 
             seen.add(m)
             models_to_try.append(m)
 
+    # Models known to support OpenAI-specific params (json mode, penalties)
+    _OPENAI_COMPATIBLE = {"gpt-4.1", "gpt-4.1-nano", "gpt-4o", "gpt-5.1-CIO", "gpt-5.2-CIO"}
+
     last_error = None
     for attempt_model in models_to_try:
         try:
-            response = _client.chat.completions.create(
-                model=attempt_model,
-                messages=[
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
+            # ── Build API params with best-practice defaults ────────────
+            api_params = {
+                "model": attempt_model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+
+            # Only pass OpenAI-specific params to compatible models.
+            # Non-OpenAI models (Gemini, Nova, etc.) may reject these.
+            if attempt_model in _OPENAI_COMPATIBLE or attempt_model.startswith("gpt"):
+                api_params["top_p"] = top_p
+                api_params["frequency_penalty"] = frequency_penalty
+                api_params["presence_penalty"] = presence_penalty
+                # JSON mode — ensures well-formed output for parsing tasks
+                if response_format == "json":
+                    api_params["response_format"] = {"type": "json_object"}
+
+            response = _client.chat.completions.create(**api_params)
             # Track token usage
             if response.usage:
                 _token_usage["total_prompt_tokens"] += response.usage.prompt_tokens or 0
@@ -168,7 +229,12 @@ def summarize_document(chunks: list[dict], model: str = DEFAULT_MODEL, progress_
 
     for i, chunk in enumerate(chunks):
         prompt = template.replace("{chunk}", chunk["text"])
-        summary = call_llm(prompt, model=model, max_tokens=1024)
+        summary = call_llm(
+            prompt, model=model,
+            temperature=LLM_TEMPERATURE_SUMMARIZE,
+            max_tokens=LLM_MAX_TOKENS_MEDIUM,
+            system_prompt="You are a clinical document summarizer. Produce concise, accurate section summaries. Never invent data.",
+        )
         chunk_summaries.append(f"[Section: {chunk['section']}]\n{summary}")
         if progress_callback:
             progress_callback(i + 1, len(chunks), "Summarizing")
@@ -184,7 +250,12 @@ def summarize_document(chunks: list[dict], model: str = DEFAULT_MODEL, progress_
         "Remove duplicates. Keep under 800 words.\n\n"
         + "\n\n---\n\n".join(chunk_summaries)
     )
-    final = call_llm(merge_prompt, model=model, max_tokens=1500)
+    final = call_llm(
+        merge_prompt, model=model,
+        temperature=LLM_TEMPERATURE_SUMMARIZE,
+        max_tokens=LLM_MAX_TOKENS_SUMMARY,
+        system_prompt="You are a clinical document summarizer. Merge section summaries into a coherent final summary. Never invent data.",
+    )
     if progress_callback:
         progress_callback(len(chunks), len(chunks), "Merging summaries")
     return final
@@ -203,7 +274,13 @@ def extract_entities(chunks: list[dict], model: str = DEFAULT_MODEL, progress_ca
 
     for i, chunk in enumerate(chunks):
         prompt = template.replace("{chunk}", chunk["text"])
-        raw = call_llm(prompt, model=model, temperature=0.1, max_tokens=1024)
+        raw = call_llm(
+            prompt, model=model,
+            temperature=LLM_TEMPERATURE_EXTRACTION,
+            max_tokens=LLM_MAX_TOKENS_MEDIUM,
+            system_prompt="You are a clinical data extraction engine. Extract structured entities exactly as found in the source text. Return valid JSON only. Never fabricate entities.",
+            response_format="json",
+        )
         parsed = _parse_json_response(raw)
         if parsed:
             _merge_entities(all_entities, parsed)
@@ -276,7 +353,13 @@ def check_risks(chunks: list[dict], model: str = DEFAULT_MODEL, doc_type: str = 
 
     for i, chunk in enumerate(chunks):
         prompt = template.replace("{chunk}", chunk["text"])
-        raw = call_llm(prompt, model=model, temperature=0.15, max_tokens=1500)
+        raw = call_llm(
+            prompt, model=model,
+            temperature=LLM_TEMPERATURE_ANALYSIS,
+            max_tokens=LLM_MAX_TOKENS_LONG,
+            system_prompt="You are a clinical risk reviewer. Identify regulatory gaps, safety concerns, and inconsistencies. Cite specific sections. Return valid JSON.",
+            response_format="json",
+        )
         parsed = _parse_json_response(raw)
         if parsed:
             findings = parsed.get("findings", [])
@@ -327,7 +410,13 @@ def analyze_consent_form(chunks: list[dict], model: str = DEFAULT_MODEL, progres
 
     for i, chunk in enumerate(chunks):
         prompt = template.replace("{chunk}", chunk["text"])
-        raw = call_llm(prompt, model=model, temperature=0.1, max_tokens=1024)
+        raw = call_llm(
+            prompt, model=model,
+            temperature=LLM_TEMPERATURE_EXTRACTION,
+            max_tokens=LLM_MAX_TOKENS_MEDIUM,
+            system_prompt="You are an ICH-GCP 4.8 consent form reviewer. Evaluate each required element for presence and adequacy. Return valid JSON.",
+            response_format="json",
+        )
         parsed = _parse_json_response(raw)
         if parsed:
             # Merge consent elements — handles {status, evidence} dicts and booleans

@@ -3,7 +3,9 @@ Risk Checker — Combines LLM-based analysis with rule-based checks
 to produce a comprehensive quality assessment of clinical documents.
 
 This is the DIFFERENTIATOR of the application:
-- ICH-GCP E6(R2) protocol completeness scoring
+- ICH M11 protocol completeness scoring (international protocol template)
+- ICH E3 CSR structure verification
+- ICH-GCP 4.8 informed consent element checking
 - Cross-section consistency validation
 - Safety gap detection
 - Overall document quality score (0–100)
@@ -14,141 +16,284 @@ import re
 
 # ── Section Checklists per Document Type ──────────────────────────────────
 
-# ICH-GCP E6(R2) required protocol elements and their detection keywords
-ICH_GCP_PROTOCOL_SECTIONS = {
-    "title_and_protocol_id": {
-        "label": "Title & Protocol ID",
-        "keywords": ["protocol number", "protocol title", "study title", "protocol id"],
-        "weight": 5,
-    },
-    "objectives": {
-        "label": "Study Objectives",
-        "keywords": ["objective", "primary objective", "secondary objective", "aim of the study"],
-        "weight": 10,
-    },
-    "study_design": {
-        "label": "Study Design",
-        "keywords": ["study design", "randomized", "double-blind", "open-label", "parallel", "crossover"],
-        "weight": 10,
-    },
-    "endpoints": {
-        "label": "Endpoints / Outcomes",
-        "keywords": ["primary endpoint", "secondary endpoint", "primary outcome", "efficacy endpoint"],
-        "weight": 10,
-    },
-    "study_population": {
-        "label": "Study Population",
-        "keywords": ["inclusion criteria", "exclusion criteria", "eligibility", "patient population"],
-        "weight": 10,
-    },
-    "treatment_description": {
-        "label": "Treatment Description",
-        "keywords": ["investigational product", "dosage", "route of administration", "treatment arm", "placebo"],
-        "weight": 8,
-    },
-    "safety_monitoring": {
-        "label": "Safety Monitoring",
-        "keywords": ["adverse event", "serious adverse event", "safety monitoring", "dsmb", "data safety"],
-        "weight": 10,
-    },
-    "statistical_methods": {
-        "label": "Statistical Methods",
-        "keywords": ["statistical analysis", "sample size", "power calculation", "intent to treat", "p-value"],
-        "weight": 8,
-    },
-    "ethical_considerations": {
-        "label": "Ethical Considerations",
-        "keywords": ["informed consent", "ethics committee", "irb", "institutional review board", "declaration of helsinki"],
-        "weight": 7,
-    },
-    "data_management": {
-        "label": "Data Management",
-        "keywords": ["data management", "case report form", "crf", "data collection", "electronic data"],
-        "weight": 5,
-    },
-    "quality_assurance": {
-        "label": "Quality Assurance",
-        "keywords": ["quality assurance", "monitoring plan", "audit", "source data verification"],
-        "weight": 5,
-    },
-    "schedule_of_assessments": {
-        "label": "Schedule of Assessments",
-        "keywords": ["schedule of assessment", "study visit", "visit schedule", "study procedures"],
-        "weight": 7,
-    },
-    "references": {
-        "label": "References / Bibliography",
-        "keywords": ["reference", "bibliography", "literature"],
-        "weight": 5,
-    },
-}
-
-# ICH E3 required sections for Clinical Study Reports
-ICH_E3_CSR_SECTIONS = {
+# ICH M11 — Clinical Electronic Structured Harmonised Protocol Template
+# The global standard for clinical trial protocol structure.
+# Sections aligned with ICH M11 (R1) template numbering.
+ICH_M11_PROTOCOL_SECTIONS = {
     "title_page": {
-        "label": "Title Page",
-        "keywords": ["clinical study report", "report title", "study report", "final report"],
+        "label": "Title Page & Protocol ID (M11 Section 1)",
+        "keywords": ["protocol number", "protocol title", "study title", "protocol id", "eudract", "nct"],
         "weight": 5,
     },
     "synopsis": {
-        "label": "Synopsis",
-        "keywords": ["synopsis", "summary of clinical study", "study synopsis"],
-        "weight": 8,
-    },
-    "ethics": {
-        "label": "Ethics / IRB Approval",
-        "keywords": ["ethics committee", "irb", "institutional review board", "ethical conduct", "informed consent"],
-        "weight": 8,
-    },
-    "investigators_and_sites": {
-        "label": "Investigators & Study Sites",
-        "keywords": ["investigator", "study site", "study center", "principal investigator", "participating site"],
+        "label": "Protocol Synopsis (M11 Section 2)",
+        "keywords": ["synopsis", "protocol summary", "study synopsis", "overview of study"],
         "weight": 5,
     },
-    "study_objectives": {
-        "label": "Study Objectives",
-        "keywords": ["objective", "primary objective", "secondary objective", "aim of the study"],
+    "schedule_of_activities": {
+        "label": "Schedule of Activities (M11 Section 3)",
+        "keywords": ["schedule of activities", "schedule of assessment", "study visit", "visit schedule", "study procedures", "soa"],
         "weight": 8,
     },
+    "introduction": {
+        "label": "Introduction & Rationale (M11 Section 4)",
+        "keywords": ["introduction", "background", "rationale", "scientific rationale", "benefit-risk", "known risk"],
+        "weight": 7,
+    },
+    "objectives_estimands": {
+        "label": "Objectives & Estimands (M11 Section 5)",
+        "keywords": ["objective", "primary objective", "secondary objective", "estimand", "intercurrent event"],
+        "weight": 10,
+    },
     "study_design": {
-        "label": "Study Design & Plan",
-        "keywords": ["study design", "randomized", "double-blind", "open-label", "study plan", "treatment period"],
+        "label": "Study Design (M11 Section 6)",
+        "keywords": ["study design", "randomized", "double-blind", "open-label", "parallel", "crossover", "adaptive design"],
         "weight": 10,
     },
     "study_population": {
-        "label": "Study Population",
-        "keywords": ["patient disposition", "subject disposition", "enrolled", "randomized patients", "intent to treat", "demographics"],
+        "label": "Study Population (M11 Section 7)",
+        "keywords": ["inclusion criteria", "exclusion criteria", "eligibility", "patient population", "screen failure"],
+        "weight": 10,
+    },
+    "treatments": {
+        "label": "Study Intervention & Concomitant Therapy (M11 Section 8)",
+        "keywords": ["investigational product", "dosage", "route of administration", "treatment arm", "placebo", "concomitant", "prohibited medication"],
+        "weight": 9,
+    },
+    "discontinuation": {
+        "label": "Discontinuation & Withdrawal (M11 Section 9)",
+        "keywords": ["discontinuation", "withdrawal", "stopping rule", "rescue", "early termination", "study completion"],
+        "weight": 7,
+    },
+    "assessments": {
+        "label": "Study Assessments / Endpoints (M11 Section 10)",
+        "keywords": ["primary endpoint", "secondary endpoint", "efficacy endpoint", "assessment", "biomarker", "patient-reported outcome"],
+        "weight": 10,
+    },
+    "safety_reporting": {
+        "label": "Adverse Events & Safety Reporting (M11 Section 11)",
+        "keywords": ["adverse event", "serious adverse event", "safety monitoring", "sae reporting", "pregnancy", "overdose"],
+        "weight": 10,
+    },
+    "statistics": {
+        "label": "Statistical Considerations (M11 Section 12)",
+        "keywords": ["statistical analysis", "sample size", "power calculation", "intent to treat", "missing data", "interim analysis", "multiplicity"],
+        "weight": 10,
+    },
+    "oversight": {
+        "label": "Oversight & Monitoring (M11 Section 13)",
+        "keywords": ["data safety monitoring", "dsmb", "monitoring plan", "quality assurance", "audit", "source data verification", "oversight committee"],
+        "weight": 8,
+    },
+    "ethics": {
+        "label": "Ethics & Regulatory (M11 Section 14)",
+        "keywords": ["informed consent", "ethics committee", "irb", "institutional review board", "declaration of helsinki", "regulatory authority"],
+        "weight": 7,
+    },
+    "data_management": {
+        "label": "Data Management & Records (M11 Section 15)",
+        "keywords": ["data management", "case report form", "crf", "electronic data", "data collection", "record retention", "source document"],
+        "weight": 5,
+    },
+    "references": {
+        "label": "References & Appendices (M11 Section 16)",
+        "keywords": ["reference", "bibliography", "appendix", "appendices", "abbreviation"],
+        "weight": 4,
+    },
+}
+
+# ICH E3 — Structure and Content of Clinical Study Reports
+# Full section-level checklist for CSR completeness.
+ICH_E3_CSR_SECTIONS = {
+    "title_page": {
+        "label": "Title Page (E3 Section 1)",
+        "keywords": ["clinical study report", "report title", "study report", "final report", "report number"],
+        "weight": 5,
+    },
+    "synopsis": {
+        "label": "Synopsis (E3 Section 2)",
+        "keywords": ["synopsis", "summary of clinical study", "study synopsis"],
+        "weight": 8,
+    },
+    "table_of_contents": {
+        "label": "Table of Contents (E3 Section 3)",
+        "keywords": ["table of contents", "contents", "list of tables", "list of figures"],
+        "weight": 3,
+    },
+    "abbreviations": {
+        "label": "List of Abbreviations (E3 Section 4)",
+        "keywords": ["abbreviation", "glossary", "definition of terms"],
+        "weight": 3,
+    },
+    "ethics": {
+        "label": "Ethics (E3 Section 5)",
+        "keywords": ["ethics committee", "irb", "institutional review board", "ethical conduct", "informed consent", "iec"],
+        "weight": 8,
+    },
+    "investigators_and_sites": {
+        "label": "Investigators & Study Sites (E3 Section 6)",
+        "keywords": ["investigator", "study site", "study center", "principal investigator", "participating site", "administrative structure"],
+        "weight": 5,
+    },
+    "introduction": {
+        "label": "Introduction (E3 Section 7)",
+        "keywords": ["introduction", "background", "rationale", "disease", "therapeutic area"],
+        "weight": 5,
+    },
+    "study_objectives": {
+        "label": "Study Objectives (E3 Section 8)",
+        "keywords": ["objective", "primary objective", "secondary objective", "aim of the study"],
+        "weight": 8,
+    },
+    "investigational_plan": {
+        "label": "Investigational Plan (E3 Section 9)",
+        "keywords": ["study design", "randomized", "double-blind", "open-label", "treatment period", "study plan", "selection of patients", "treatment", "efficacy variable", "safety variable", "statistical method", "sample size"],
+        "weight": 12,
+    },
+    "study_patients": {
+        "label": "Study Patients (E3 Section 10)",
+        "keywords": ["patient disposition", "subject disposition", "enrolled", "randomized patients", "intent to treat", "demographics", "baseline characteristics", "protocol deviation"],
         "weight": 10,
     },
     "efficacy_results": {
-        "label": "Efficacy Results",
-        "keywords": ["efficacy analysis", "efficacy results", "primary efficacy", "primary endpoint result", "efficacy evaluation"],
+        "label": "Efficacy Evaluation (E3 Section 11)",
+        "keywords": ["efficacy analysis", "efficacy results", "primary efficacy", "primary endpoint result", "efficacy evaluation", "responder analysis"],
         "weight": 12,
     },
     "safety_results": {
-        "label": "Safety Results",
-        "keywords": ["safety analysis", "safety results", "adverse event", "serious adverse event", "safety summary", "safety evaluation"],
+        "label": "Safety Evaluation (E3 Section 12)",
+        "keywords": ["safety analysis", "safety results", "adverse event", "serious adverse event", "safety summary", "safety evaluation", "deaths", "laboratory findings", "vital signs"],
         "weight": 12,
     },
-    "statistical_methods": {
-        "label": "Statistical Methods",
-        "keywords": ["statistical analysis", "statistical method", "analysis population", "sample size", "confidence interval"],
-        "weight": 10,
-    },
-    "discussion": {
-        "label": "Discussion & Interpretation",
-        "keywords": ["discussion", "interpretation", "clinical significance", "benefit-risk"],
+    "discussion_conclusions": {
+        "label": "Discussion & Overall Conclusions (E3 Section 13)",
+        "keywords": ["discussion", "interpretation", "clinical significance", "benefit-risk", "conclusion", "overall conclusion"],
         "weight": 8,
     },
-    "conclusion": {
-        "label": "Conclusion",
-        "keywords": ["conclusion", "overall conclusion", "study conclusion"],
+    "tables_figures_graphs": {
+        "label": "Tables, Figures, Graphs (E3 Section 14)",
+        "keywords": ["table", "figure", "graph", "listing", "kaplan-meier", "forest plot"],
+        "weight": 4,
+    },
+    "reference_list": {
+        "label": "Reference List (E3 Section 15)",
+        "keywords": ["reference", "bibliography", "literature"],
+        "weight": 3,
+    },
+    "appendices": {
+        "label": "Appendices (E3 Section 16)",
+        "keywords": ["appendix", "appendices", "case report form", "protocol and amendments", "patient data listings"],
+        "weight": 4,
+    },
+}
+
+# ICH-GCP E6(R2) Section 4.8.10 — All Required Elements of Informed Consent
+# Expanded to cover the full 20-element checklist.
+ICH_GCP_48_CONSENT_SECTIONS = {
+    "study_is_research": {
+        "label": "Statement that study involves research (4.8.10a)",
+        "keywords": ["research study", "clinical study", "clinical trial", "research involving"],
+        "weight": 8,
+    },
+    "study_purpose": {
+        "label": "Purpose of the trial (4.8.10b)",
+        "keywords": ["purpose of the study", "study purpose", "aim of this study", "objective of this research"],
+        "weight": 10,
+    },
+    "treatments_and_randomization": {
+        "label": "Trial treatments & probability of assignment (4.8.10c)",
+        "keywords": ["treatment", "assigned", "randomiz", "placebo", "chance", "probability", "group"],
+        "weight": 9,
+    },
+    "procedures": {
+        "label": "Study procedures (4.8.10d)",
+        "keywords": ["procedure", "what will happen", "study visit", "blood sample", "examination", "test"],
+        "weight": 10,
+    },
+    "responsibilities": {
+        "label": "Subject's responsibilities (4.8.10e)",
+        "keywords": ["responsibilit", "expected to", "must follow", "comply", "asked to"],
+        "weight": 6,
+    },
+    "experimental_aspects": {
+        "label": "Experimental aspects (4.8.10f)",
+        "keywords": ["experimental", "investigational", "not yet approved", "being studied", "new treatment"],
         "weight": 7,
     },
-    "references": {
-        "label": "References / Appendices",
-        "keywords": ["reference", "bibliography", "appendix", "appendices"],
-        "weight": 4,
+    "risks": {
+        "label": "Foreseeable risks & discomforts (4.8.10g)",
+        "keywords": ["risk", "discomfort", "side effect", "adverse", "danger", "harm", "toxicity"],
+        "weight": 10,
+    },
+    "benefits": {
+        "label": "Expected benefits (4.8.10h)",
+        "keywords": ["benefit", "advantage", "may help", "potential benefit", "no direct benefit"],
+        "weight": 8,
+    },
+    "alternatives": {
+        "label": "Alternative procedures / treatments (4.8.10i)",
+        "keywords": ["alternative", "other option", "other treatment", "instead of", "standard of care"],
+        "weight": 7,
+    },
+    "compensation_for_injury": {
+        "label": "Compensation for injury (4.8.10j)",
+        "keywords": ["compensat", "injury", "treatment for injury", "medical care", "harm during"],
+        "weight": 7,
+    },
+    "payment_proration": {
+        "label": "Payment & proration (4.8.10k)",
+        "keywords": ["payment", "reimburse", "financial", "stipend", "pro-rated", "cost"],
+        "weight": 6,
+    },
+    "expenses": {
+        "label": "Anticipated expenses (4.8.10l)",
+        "keywords": ["expense", "cost to you", "no charge", "additional cost", "travel"],
+        "weight": 5,
+    },
+    "voluntary_participation": {
+        "label": "Voluntary participation & withdrawal (4.8.10m)",
+        "keywords": ["voluntary", "free to", "choose to", "right to refuse", "no penalty", "withdraw"],
+        "weight": 10,
+    },
+    "monitor_auditor_access": {
+        "label": "Access by monitors / auditors / IRBs (4.8.10n)",
+        "keywords": ["monitor", "auditor", "irb", "review board", "access to records", "inspect"],
+        "weight": 6,
+    },
+    "confidentiality": {
+        "label": "Confidentiality of records (4.8.10o)",
+        "keywords": ["confidential", "privacy", "personal information", "data protection", "hipaa", "identif"],
+        "weight": 8,
+    },
+    "new_information": {
+        "label": "New information notification (4.8.10p)",
+        "keywords": ["new information", "new finding", "updated information", "will be informed", "may affect"],
+        "weight": 7,
+    },
+    "contact_for_questions": {
+        "label": "Contact persons for questions (4.8.10q)",
+        "keywords": ["contact", "telephone", "phone", "email", "call", "question"],
+        "weight": 8,
+    },
+    "contact_for_rights": {
+        "label": "Contact for subject rights (4.8.10r)",
+        "keywords": ["rights", "irb", "ethics committee", "iec", "institutional review board", "concern"],
+        "weight": 7,
+    },
+    "circumstances_for_termination": {
+        "label": "Circumstances for termination (4.8.10s)",
+        "keywords": ["terminat", "early end", "discontinue", "removed from study", "investigator may"],
+        "weight": 6,
+    },
+    "duration": {
+        "label": "Expected duration of participation (4.8.10t)",
+        "keywords": ["duration", "how long", "length of participation", "weeks", "months", "period of", "expected to last"],
+        "weight": 7,
+    },
+    "number_of_subjects": {
+        "label": "Approximate number of subjects (4.8.10u)",
+        "keywords": ["number of", "approximately", "subjects", "participants will", "people will", "patients in this study"],
+        "weight": 5,
     },
 }
 
@@ -186,83 +331,19 @@ GENERIC_CLINICAL_SECTIONS = {
     },
 }
 
-# ICH-GCP 4.8 required elements for Informed Consent Forms (rule-based)
-ICH_GCP_CONSENT_SECTIONS = {
-    "study_purpose": {
-        "label": "Study Purpose",
-        "keywords": ["purpose of the study", "study purpose", "research study", "aim of this study"],
-        "weight": 10,
-    },
-    "procedures": {
-        "label": "Study Procedures",
-        "keywords": ["procedure", "what will happen", "study visit", "blood sample", "examination"],
-        "weight": 10,
-    },
-    "duration": {
-        "label": "Duration of Participation",
-        "keywords": ["duration", "how long", "length of participation", "weeks", "months", "period of"],
-        "weight": 7,
-    },
-    "risks": {
-        "label": "Risks & Discomforts",
-        "keywords": ["risk", "discomfort", "side effect", "adverse", "danger", "harm"],
-        "weight": 10,
-    },
-    "benefits": {
-        "label": "Benefits",
-        "keywords": ["benefit", "advantage", "may help", "potential benefit"],
-        "weight": 8,
-    },
-    "alternatives": {
-        "label": "Alternatives to Participation",
-        "keywords": ["alternative", "other option", "other treatment", "instead of"],
-        "weight": 7,
-    },
-    "confidentiality": {
-        "label": "Confidentiality",
-        "keywords": ["confidential", "privacy", "personal information", "data protection", "hipaa"],
-        "weight": 8,
-    },
-    "voluntary_participation": {
-        "label": "Voluntary Participation",
-        "keywords": ["voluntary", "free to", "choose to", "right to refuse", "no penalty"],
-        "weight": 10,
-    },
-    "withdrawal_rights": {
-        "label": "Right to Withdraw",
-        "keywords": ["withdraw", "discontinue", "stop participating", "leave the study", "right to stop"],
-        "weight": 10,
-    },
-    "compensation": {
-        "label": "Compensation & Costs",
-        "keywords": ["compensation", "payment", "cost", "reimburse", "financial", "injury"],
-        "weight": 7,
-    },
-    "contact_information": {
-        "label": "Contact Information",
-        "keywords": ["contact", "telephone", "phone", "email", "call", "reach"],
-        "weight": 8,
-    },
-    "irb_information": {
-        "label": "IRB / Ethics Committee Information",
-        "keywords": ["irb", "institutional review board", "ethics committee", "iec", "review board"],
-        "weight": 5,
-    },
-}
-
 # Map doc_type → appropriate section checklist
 _SECTION_MAP = {
-    "protocol": ICH_GCP_PROTOCOL_SECTIONS,
+    "protocol": ICH_M11_PROTOCOL_SECTIONS,
     "csr": ICH_E3_CSR_SECTIONS,
-    "consent_form": ICH_GCP_CONSENT_SECTIONS,
+    "consent_form": ICH_GCP_48_CONSENT_SECTIONS,
     "clinical_document": GENERIC_CLINICAL_SECTIONS,
 }
 
 # Guideline label per doc_type for user-facing messages
 _GUIDELINE_LABELS = {
-    "protocol": "ICH-GCP E6(R2)",
+    "protocol": "ICH M11",
     "csr": "ICH E3",
-    "consent_form": "ICH-GCP E6(R2) Section 4.8",
+    "consent_form": "ICH-GCP 4.8",
     "clinical_document": "General Clinical",
 }
 
@@ -458,7 +539,7 @@ def _check_entities(entities: dict) -> list[dict]:
             "title": "No primary endpoints extracted",
             "description": "The system could not identify primary endpoint(s) in the document.",
             "section_reference": "Endpoints",
-            "recommendation": "Primary endpoints must be clearly defined per ICH-GCP requirements.",
+            "recommendation": "Primary endpoints must be clearly defined per ICH M11 Section 10 requirements.",
         })
 
     if not entities.get("inclusion_criteria") and not entities.get("exclusion_criteria"):

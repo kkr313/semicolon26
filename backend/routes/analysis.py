@@ -29,7 +29,12 @@ from backend.services.llm_analyzer import (
     reset_token_usage,
 )
 from backend.services.risk_checker import run_rule_based_checks, calculate_quality_score
-from backend.services.demo_data import DEMO_SUMMARY, DEMO_ENTITIES, DEMO_RISK, DEMO_CONSENT, DEMO_TOKEN_USAGE
+from backend.services.demo_data import DEMO_SUMMARY, DEMO_ENTITIES, DEMO_RISK, DEMO_CONSENT, DEMO_TOKEN_USAGE, DEMO_COMPARISON
+from backend.services.agent_orchestrator import run_all_agents
+from backend.services.hallucination_checker import verify_findings, get_verification_summary
+from backend.services.fix_suggestion_generator import generate_fix_suggestions
+from backend.services.document_comparator import store_analysis_for_comparison, get_comparison
+from backend.services.cross_doc_comparator import run_cross_document_comparison
 from backend.services.user_session import save_analysis_to_history
 from backend.services.report_generator import generate_pdf_report, generate_json_report
 
@@ -71,7 +76,7 @@ async def analyze_document(
     request: Request,
     file: UploadFile = File(...),
     demo_mode: str = Form(None),
-    model: str = Form("gpt-4.1-nano"),
+    model: str = Form("gpt-4.1"),
     user_id: str = Form(""),
 ):
     """
@@ -142,7 +147,7 @@ async def analyze_document(
 
             summary = await run_or_cancel(summarize_document, chunks, model=model)
             entities = await run_or_cancel(extract_entities, chunks, model=model)
-            risk = await run_or_cancel(check_risks, chunks, model=model, doc_type=doc_type)
+            risk = await run_or_cancel(run_all_agents, chunks, model=model, doc_type=doc_type)
 
             analysis = {
                 "summary": summary,
@@ -153,11 +158,21 @@ async def analyze_document(
                 analysis["consent"] = await run_or_cancel(analyze_consent_form, chunks, model=model)
             analysis["token_usage"] = get_token_usage()
 
+        # Hallucination check — verify LLM evidence against source (zero LLM cost)
+        risk_findings = analysis["risk"].get("findings", [])
+        if risk_findings and not use_demo:
+            verify_findings(risk_findings, parsed["text"], chunks)
+        analysis["risk"]["verification"] = get_verification_summary(risk_findings)
+
+        # Fix suggestions — generate actionable remediation text (zero LLM cost)
+        if risk_findings and not use_demo:
+            generate_fix_suggestions(risk_findings)
+
         # Rule-based checks (always run — no LLM needed)
         rule_results = run_rule_based_checks(parsed["text"], analysis["entities"], doc_type=doc_type)
         quality = calculate_quality_score(
             rule_results["completeness_score"],
-            analysis["risk"].get("findings", []),
+            risk_findings,
             rule_results.get("rule_findings", []),
         )
 
@@ -179,6 +194,18 @@ async def analyze_document(
             "quality": quality,
             "token_usage": analysis["token_usage"],
         }
+
+        # Cross-document comparison — store and compare
+        if user_id:
+            try:
+                store_analysis_for_comparison(user_id, result)
+                comparison = get_comparison(user_id)
+                if comparison:
+                    result["comparison"] = comparison
+            except Exception:
+                pass
+        if use_demo:
+            result["comparison"] = DEMO_COMPARISON
 
         # Save to user history
         if user_id:
@@ -252,3 +279,114 @@ async def download_json(
         media_type="application/json",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
     )
+
+
+@router.post("/compare")
+async def compare_documents(
+    request: Request,
+    files: list[UploadFile] = File(...),
+    demo_mode: str = Form(None),
+    model: str = Form("gpt-4.1"),
+    user_id: str = Form(""),
+):
+    """
+    Multi-document cross-comparison.
+    Accepts 2-3 files (Protocol, CSR, Consent Form), analyses each,
+    then performs cross-document comparison to find inconsistencies.
+    """
+    from backend.services.demo_data import DEMO_CROSS_DOC_COMPARISON
+
+    if demo_mode is None:
+        use_demo = DEFAULT_DEMO_MODE
+    else:
+        use_demo = demo_mode.lower() == "true"
+
+    if len(files) < 2:
+        raise HTTPException(status_code=400, detail="Upload at least 2 documents to compare.")
+    if len(files) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 documents at once.")
+
+    # In demo mode, return pre-built comparison
+    if use_demo:
+        return {"success": True, "demo_mode": True, **DEMO_CROSS_DOC_COMPARISON}
+
+    # Live mode: parse + analyse each document, then compare
+    tmp_paths = []
+    doc_results = []
+    loop = asyncio.get_event_loop()
+    executor = ThreadPoolExecutor(max_workers=1)
+
+    async def _run_or_cancel(func, *a, **kw):
+        task = loop.run_in_executor(executor, lambda: func(*a, **kw))
+        while not task.done():
+            if await request.is_disconnected():
+                task.cancel()
+                raise HTTPException(status_code=499, detail="Client disconnected")
+            await asyncio.sleep(0.5)
+        return task.result()
+
+    try:
+        for uploaded in files:
+            suffix = Path(uploaded.filename).suffix.lower()
+            if suffix not in {".pdf", ".docx", ".txt"}:
+                raise HTTPException(status_code=400, detail=f"Unsupported file: {uploaded.filename}")
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                content = await uploaded.read()
+                tmp.write(content)
+                tmp_paths.append(tmp.name)
+
+            adapter = _UploadedFileAdapter(tmp_paths[-1], uploaded.filename, uploaded.content_type or "application/octet-stream")
+            parsed = parse_uploaded_file(adapter)
+            if parsed.get("error"):
+                raise HTTPException(status_code=422, detail=f"{uploaded.filename}: {parsed['error']}")
+
+            clinical_check = is_clinical_document(parsed["text"])
+            if not clinical_check["is_clinical"]:
+                raise HTTPException(status_code=422, detail=f"{uploaded.filename}: {clinical_check['message']}")
+
+            chunks = chunk_text(parsed["text"])
+            doc_type = detect_document_type(parsed["text"])
+
+            try:
+                reset_token_usage()
+                summary = await _run_or_cancel(summarize_document, chunks, model=model)
+                entities = await _run_or_cancel(extract_entities, chunks, model=model)
+                risk = await _run_or_cancel(run_all_agents, chunks, model=model, doc_type=doc_type)
+            except HTTPException:
+                raise
+            except Exception as exc:
+                raise HTTPException(status_code=500, detail=f"LLM analysis failed for {uploaded.filename}: {exc}")
+
+            rule_results = run_rule_based_checks(parsed["text"], entities, doc_type=doc_type)
+            quality = calculate_quality_score(
+                rule_results["completeness_score"],
+                risk.get("findings", []),
+                rule_results.get("rule_findings", []),
+            )
+
+            doc_results.append({
+                "filename": parsed["filename"],
+                "doc_type": doc_type,
+                "doc_type_label": get_doc_type_label(doc_type),
+                "text": parsed["text"],
+                "entities": entities,
+                "summary": summary,
+                "risk": risk,
+                "quality": quality,
+                "rule": rule_results,
+            })
+
+        # Run cross-document comparison
+        try:
+            comparison = run_cross_document_comparison(doc_results, use_llm=True, model=model)
+        except Exception as exc:
+            comparison = run_cross_document_comparison(doc_results, use_llm=False)
+        return {"success": True, "demo_mode": False, **comparison}
+
+    finally:
+        for p in tmp_paths:
+            try:
+                os.unlink(p)
+            except OSError:
+                pass

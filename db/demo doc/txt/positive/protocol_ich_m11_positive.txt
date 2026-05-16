@@ -1,0 +1,187 @@
+CLINICAL STUDY PROTOCOL
+Protocol Title:	A Phase II, Randomized, Double-Blind, Placebo-Controlled, Multicenter Study to Evaluate the Efficacy, Safety, and Tolerability of CLN-201 in Adult Participants With Moderate Inflammatory Disease
+Protocol Number:CLN-201-2026-01
+ 
+Investigational Product:
+ 
+CLN-201
+ 
+Sponsor:	NovaCura Biotech
+ 
+Development Phase:
+ 
+Phase II
+ 
+Version:	1.0
+Date:	2026-05-16
+
+
+Table of Contents
+
+1.	Protocol Summary
+2.	Introduction
+3.	Objectives and Endpoints
+4.	Study Design
+5.	Study Population
+6.	Treatment of Participants
+7.	Study Assessments and Procedures
+8.	Adverse Event Reporting
+9.	Statistics
+10.	Ethics and Regulatory Considerations
+11.	Data Handling and Recordkeeping
+12.	Quality Control and Quality Assurance
+13.	Financing and Insurance
+14.	Publication Policy
+15.	References
+16.	Appendices
+
+1.	Protocol Summary
+
+ 
+
+Item	Description
+Study Title	A Phase II, Randomized, Double-Blind, Placebo-Controlled, Multicenter Study to Evaluate the Efficacy, Safety, and Tolerability of CLN-201 in Adult Participants With Moderate Inflammatory Disease
+Protocol Number	CLN-201-2026-01
+Phase	Phase II
+Design	Randomized, double-blind, placebo-controlled, parallel-group, multicenter
+Population	Adults 18 to 75 years of age with moderate inflammatory disease and stable background therapy where applicable
+Sample Size	Approximately 120 randomized participants
+Treatment	CLN-201 10 mg orally once daily or matching placebo once daily for 12 weeks
+Primary Objective	To evaluate the efficacy of CLN-201 compared with placebo in reducing disease activity from baseline to Week 12
+Primary Endpoint	Change from baseline to Week 12 in disease activity score
+Secondary Endpoints	Symptom improvement, biomarker changes, quality-of-life measures, clinical response rate, safety and tolerability
+Study Duration	Screening up to 21 days, treatment 12 weeks, follow-up 4 weeks
+
+2.	Introduction
+
+CLN-201 is an investigational product under development for the treatment of inflammatory disease. The purpose of this study is to evaluate the efficacy, safety, and tolerability of CLN-201 in adult participants with moderate inflammatory disease.
+Despite currently available therapies, unmet medical need remains for participants who experience persistent disease activity or incomplete symptom control. This study is designed to generate controlled clinical data to support further development of CLN-201.
+ 
+3.	Objectives and Endpoints
+
+3.1	Primary Objective
+To evaluate the efficacy of CLN-201 compared with placebo in reducing disease activity from baseline to Week 12.
+
+3.2	Primary Endpoint
+Change from baseline to Week 12 in disease activity score.
+
+3.3	Secondary Objectives
+  To assess the effect of CLN-201 on disease-related symptoms.   To assess the effect of CLN-201 on inflammatory biomarkers.   To evaluate quality-of-life outcomes.
+  To evaluate safety and tolerability of CLN-201.
+
+3.4	Secondary Endpoints
+  Change from baseline to Week 12 in symptom score.
+  Change from baseline to Week 12 in C-reactive protein.
+  Change from baseline to Week 12 in participant-reported quality-of-life measures.
+  Incidence of adverse events, serious adverse events, and discontinuations due to adverse events.
+
+4.	Study Design
+
+This is a Phase II, randomized, double-blind, placebo-controlled, parallel-group, multicenter study in adult participants with moderate inflammatory disease.
+Approximately 120 participants will be randomized in a 1:1 ratio to receive CLN-201 10 mg orally once daily or matching placebo once daily for 12 weeks.
+Study visits will occur during screening, baseline, Weeks 2, 4, 8, and 12, with a safety follow-up visit approximately 4 weeks after the last dose.
+4.1	Scientific Rationale for Study Design
+A placebo-controlled, randomized, and double-blind design was selected to provide an unbiased assessment of the efficacy and safety of CLN-201 while minimizing systematic bias.
+4.2	Justification for Dose
+The 10 mg once-daily dose of CLN-201 was selected based on prior clinical and nonclinical data indicating an acceptable balance of pharmacodynamic activity and tolerability.
+ 
+5.	Study Population
+
+5.1	Inclusion Criteria
+  Male or female adults 18 to 75 years of age.
+  Confirmed diagnosis of moderate inflammatory disease according to protocol-defined criteria.
+  Stable background therapy for at least 4 weeks before randomization, where applicable.   Able and willing to provide written informed consent.
+  Able and willing to comply with study procedures.
+
+5.2	Exclusion Criteria
+  Clinically significant active infection.   Pregnancy or breastfeeding.
+  Uncontrolled significant cardiovascular, hepatic, renal, neurologic, or psychiatric disease.
+  Participation in another interventional clinical study within 30 days or 5 half-lives of the prior investigational product, whichever is longer.
+  Any condition that, in the opinion of the investigator, would place the participant at undue risk or interfere with study evaluations.
+
+6.	Treatment of Participants
+
+6.1	Study Treatment
+Participants will receive CLN-201 10 mg tablets or matching placebo tablets orally once daily for 12 weeks.
+
+6.2	Randomization and Blinding
+Participants will be randomized in a 1:1 ratio using a centralized randomization schedule. Study treatment assignment will remain blinded to participants, investigators, study site personnel, and sponsor personnel involved in study conduct, except as required for emergency unblinding.
+6.3	Dose Modification and Discontinuation
+Temporary interruption or permanent discontinuation of study treatment may occur in the event of clinically significant adverse events, protocol-defined safety findings, pregnancy, withdrawal of consent, or investigator decision.
+
+7.	Study Assessments and Procedures
+
+ 
+7.1	Efficacy Assessments
+  Disease activity score   Symptom assessment
+  Participant-reported quality-of-life measures
+  Inflammatory biomarkers including C-reactive protein
+
+7.2	Safety Assessments
+  Monitoring of adverse events and serious adverse events   Clinical laboratory evaluations
+  Vital signs
+  Physical examination
+  Concomitant medication review
+
+7.3	Schedule of Activities
+
+Assessment	Screening	Baseline	Week 2	Week 4	Week 8	Week 12	Follow- up
+Informed consent	X						
+Eligibility review	X	X					
+Randomization		X					
+Study drug dispensing		X	X	X	X	X	
+Disease activity score		X	X	X	X	X	
+Laboratory tests	X	X	X	X	X	X	X
+Adverse event review		X	X	X	X	X	X
+Vital signs	X	X	X	X	X	X	X
+
+8.	Adverse Event Reporting
+
+All adverse events occurring after informed consent and through the follow-up period will be collected and assessed by the investigator. Serious adverse events will be reported according to protocol-defined timelines and applicable regulations.
+ 
+9.	Statistics
+
+9.1	Sample Size Determination
+A sample size of approximately 120 randomized participants is planned to provide adequate precision and power for evaluation of the primary endpoint.
+
+9.2	Analysis Sets
+  Intent-to-Treat Set: all randomized participants
+  Safety Set: all participants who receive at least one dose of study treatment
+  Per-Protocol Set: participants without major protocol deviations affecting efficacy evaluation
+9.3	Primary Analysis
+The primary endpoint will compare change from baseline to Week 12 in disease activity score between treatment groups using an appropriate statistical model with treatment as a factor and baseline value as a covariate.
+9.4	Missing Data
+Handling of missing data will be specified in the statistical analysis plan, including sensitivity analyses where appropriate.
+
+10.	Ethics and Regulatory Considerations
+
+This study will be conducted in accordance with the principles of the Declaration of Helsinki, ICH Good Clinical Practice, and applicable regulatory requirements. Approval from the appropriate IRB/IEC will be obtained before study initiation at each site. Written informed consent will be obtained before conduct of study-specific procedures.
+
+11.	Data Handling and Recordkeeping
+
+Study data will be recorded in case report forms and maintained in accordance with sponsor procedures and applicable requirements for confidentiality, data integrity, and retention.
+
+12.	Quality Control and Quality Assurance
+
+The sponsor or designee will implement monitoring, quality control, and quality assurance procedures to ensure the study is conducted and documented appropriately.
+
+13.	Financing and Insurance
+
+ 
+Financing and insurance arrangements will be managed by the sponsor in accordance with applicable local requirements.
+
+14.	Publication Policy
+
+Publication of study results will be managed by the sponsor in coordination with investigators and in accordance with applicable agreements and scientific standards.
+
+15.	References
+
+  ICH E6 Guideline for Good Clinical Practice
+  ICH M11 Clinical Electronic Structured Harmonised Protocol
+  Applicable scientific literature relevant to inflammatory disease and CLN-201 development
+
+16.	Appendices
+
+Schedule of Activities Laboratory Reference Ranges
+Contraception and Pregnancy Guidance Adverse Event Definitions
+List of Study Procedures

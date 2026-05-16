@@ -40,7 +40,7 @@
         <!-- Upload Section -->
         <section id="upload-section" class="mb-8 animate-slide-up">
             <h1 class="text-2xl font-bold mb-1" style="color:var(--text-heading);">Document Analysis</h1>
-            <p class="text-sm mb-6" style="color:var(--text-muted);">Upload a clinical document for AI-powered analysis</p>
+            <p class="text-sm mb-6" style="color:var(--text-muted);">Upload clinical documents for AI-powered analysis or cross-document comparison</p>
 
             <!-- How It Works Guide -->
             <div class="rounded-2xl border p-5 mb-6" style="background:color-mix(in srgb, var(--clinical-teal) 4%, var(--bg-card));border-color:color-mix(in srgb, var(--clinical-teal) 25%, var(--border-card));">
@@ -71,7 +71,7 @@
                         <div class="flex flex-col items-center text-center p-3 rounded-xl border" style="background:color-mix(in srgb, var(--clinical-teal) 5%, var(--bg-card));border-color:color-mix(in srgb, var(--clinical-teal) 15%, var(--border-card));">
                             <span class="text-2xl mb-2">⚠️</span>
                             <p class="text-xs font-bold mb-1" style="color:var(--text-heading);">4. Risk & Compliance</p>
-                            <p class="text-[11px] leading-tight" style="color:var(--text-muted);">Each chunk is checked against ICH-GCP rules, protocol consistency, and known risk patterns.</p>
+                            <p class="text-[11px] leading-tight" style="color:var(--text-muted);">Each chunk is checked against ICH M11 / E3 / GCP 4.8 rules, protocol consistency, and known risk patterns.</p>
                         </div>
                         <div class="flex flex-col items-center text-center p-3 rounded-xl border" style="background:color-mix(in srgb, var(--clinical-teal) 5%, var(--bg-card));border-color:color-mix(in srgb, var(--clinical-teal) 15%, var(--border-card));">
                             <span class="text-2xl mb-2">📊</span>
@@ -89,11 +89,53 @@
             </div>
 
             <div class="rounded-2xl border p-8" style="background:var(--bg-card);border-color:var(--border-card);">
-                <div class="hidden">
-                    <input type="checkbox" id="demo-toggle">
-                    <select id="model-select"><option value="gpt-4.1-nano" selected>gpt-4.1-nano</option></select>
+                <!-- Mode Controls -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-5 border-b" style="border-color:var(--border-card);">
+                    <div class="flex items-center gap-5">
+                        <!-- Demo / Live Toggle -->
+                        <div class="flex items-center gap-2.5">
+                            <label for="demo-toggle" class="relative inline-flex items-center cursor-pointer" style="width:44px;height:24px;flex-shrink:0;">
+                                <input type="checkbox" id="demo-toggle" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">
+                                <div id="toggle-track" class="absolute inset-0 rounded-full transition-colors duration-200"
+                                     style="background:var(--clinical-green);"></div>
+                                <div id="toggle-knob" class="absolute top-[2px] left-[2px] w-5 h-5 rounded-full transition-all duration-200"
+                                     style="background:white;"></div>
+                            </label>
+                            <div class="flex flex-col">
+                                <span id="mode-label" class="text-xs font-bold" style="color:var(--text-heading);">LIVE MODE</span>
+                                <span id="mode-desc" class="text-[10px]" style="color:var(--text-muted);">Using LLM Gateway</span>
+                            </div>
+                        </div>
+
+                        <!-- Model Selector -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--text-muted);">Model</span>
+                            <select id="model-select" class="text-xs font-medium px-3 py-1.5 rounded-lg border appearance-none cursor-pointer"
+                                    style="background:var(--bg-input);border-color:var(--border-input);color:var(--text-heading);">
+                                <option value="gpt-4.1" selected>gpt-4.1</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- LLM Status -->
+                    <div class="flex items-center gap-2">
+                        <div id="llm-status-dot" class="w-2 h-2 rounded-full" style="background:var(--clinical-amber);"></div>
+                        <span id="llm-status-text" class="text-[11px] font-medium" style="color:var(--text-muted);">Checking...</span>
+                    </div>
                 </div>
 
+                <!-- Analysis Mode Tabs -->
+                <div class="flex items-center gap-1 mb-6 p-1 rounded-xl" style="background:var(--bg-input);">
+                    <button id="tab-single" onclick="switchAnalysisTab('single')" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="background:var(--bg-accent-soft);color:var(--text-heading);">
+                        📄 Single Document
+                    </button>
+                    <button id="tab-multi" onclick="switchAnalysisTab('multi')" class="flex-1 px-4 py-2 text-xs font-semibold rounded-lg transition-all" style="color:var(--text-muted);">
+                        📑 Multi-Doc Compare
+                    </button>
+                </div>
+
+                <!-- SINGLE DOC ZONE -->
+                <div id="single-doc-zone">
                 <!-- Drop Zone -->
                 <div id="drop-zone" class="border-2 border-dashed rounded-2xl p-14 text-center transition-all cursor-pointer group" style="border-color:var(--border-input);">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform" style="background:var(--bg-input);">📄</div>
@@ -114,6 +156,34 @@
                     <button onclick="runAnalysis()" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:var(--gradient-primary);box-shadow:0 4px 12px rgba(13,148,136,0.2);">
                         Run Analysis →
                     </button>
+                </div>
+                </div>
+
+                <!-- MULTI DOC ZONE -->
+                <div id="multi-doc-zone" class="hidden">
+                    <div class="mb-4 p-3 rounded-xl text-xs" style="background:color-mix(in srgb, #6366f1 6%, var(--bg-card));border:1px solid color-mix(in srgb, #6366f1 20%, transparent);color:var(--text-secondary);">
+                        <strong style="color:var(--text-heading);">Cross-Document Comparison:</strong> Upload 2-3 related documents (Protocol, CSR, Consent Form) from the same study. The system will extract key fields from each and compare them to find inconsistencies, missing data, and semantic differences.
+                    </div>
+                    <div id="multi-drop-zone" class="border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer group" style="border-color:var(--border-input);">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform" style="background:var(--bg-input);">📑</div>
+                        <p class="font-medium mb-1" style="color:var(--text-heading);">Drop 2-3 documents here or click to browse</p>
+                        <p class="text-sm" style="color:var(--text-muted);">Protocol + CSR + Consent Form (same study)</p>
+                        <input type="file" id="multi-file-input" accept=".pdf,.docx,.txt" multiple class="hidden">
+                    </div>
+                    <!-- Multi file list -->
+                    <div id="multi-file-list" class="hidden mt-4 space-y-2"></div>
+                    <!-- Compare Button -->
+                    <div id="multi-action" class="hidden mt-4 flex items-center justify-between">
+                        <span id="multi-file-count" class="text-xs font-semibold" style="color:var(--text-muted);"></span>
+                        <div class="flex gap-3">
+                            <button onclick="clearMultiFiles()" class="px-4 py-2 text-xs font-semibold rounded-xl border transition hover:opacity-80" style="border-color:var(--border-input);color:var(--text-muted);">
+                                Clear All
+                            </button>
+                            <button onclick="runMultiDocCompare()" class="px-6 py-2.5 text-white text-sm font-semibold rounded-xl hover:opacity-90 transition" style="background:linear-gradient(135deg, #6366f1, #8b5cf6);box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+                                Compare Documents →
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -149,7 +219,7 @@
                 </div>
 
                 <!-- Pipeline Steps -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="pipeline-steps">
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="pipeline-steps">
                     <div class="ai-step" data-step="0">
                         <div class="ai-step-icon">📄</div>
                         <div class="ai-step-label">Parsing</div>
@@ -169,21 +239,33 @@
                         <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
                     </div>
                     <div class="ai-step" data-step="3">
-                        <div class="ai-step-icon">⚠️</div>
-                        <div class="ai-step-label">LLM Risk</div>
-                        <div class="ai-step-desc">Risk &amp; compliance</div>
+                        <div class="ai-step-icon">🛡️</div>
+                        <div class="ai-step-label">Safety</div>
+                        <div class="ai-step-desc">AE/SAE review</div>
                         <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
                     </div>
                     <div class="ai-step" data-step="4">
+                        <div class="ai-step-icon">📊</div>
+                        <div class="ai-step-label">Statistics</div>
+                        <div class="ai-step-desc">Methodology</div>
+                        <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
+                    </div>
+                    <div class="ai-step" data-step="5">
                         <div class="ai-step-icon">📋</div>
+                        <div class="ai-step-label">Regulatory</div>
+                        <div class="ai-step-desc">ICH M11 / E3 / 4.8</div>
+                        <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
+                    </div>
+                    <div class="ai-step" data-step="6">
+                        <div class="ai-step-icon">✅</div>
                         <div class="ai-step-label">Rule Checks</div>
                         <div class="ai-step-desc">Section coverage</div>
                         <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
                     </div>
-                    <div class="ai-step" data-step="5">
-                        <div class="ai-step-icon">📊</div>
+                    <div class="ai-step" data-step="7">
+                        <div class="ai-step-icon">📑</div>
                         <div class="ai-step-label">Report</div>
-                        <div class="ai-step-desc">Final compilation</div>
+                        <div class="ai-step-desc">Merge &amp; compile</div>
                         <div class="ai-step-bar"><div class="ai-step-fill"></div></div>
                     </div>
                 </div>
@@ -246,7 +328,7 @@
                 </div>
                 <!-- Compliance Card -->
                 <div class="rounded-2xl border p-6 flex flex-col items-center" style="background:var(--bg-card);border-color:var(--border-card);">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider mb-5" style="color:var(--text-muted);">ICH-GCP Compliance</h3>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider mb-5" style="color:var(--text-muted);">Guideline Compliance</h3>
                     <div class="relative w-44 h-44">
                         <div class="absolute inset-0 rounded-full" style="border:3px dashed color-mix(in srgb, var(--clinical-green) 15%, transparent);"></div>
                         <div class="absolute inset-[6px]">
@@ -316,7 +398,20 @@
                 </div>
             </div>
 
-            <!-- Row 4: Risk Findings -->
+            <!-- Row 4: Agent Panel + Risk Findings -->
+            <!-- Agent Summary Panel -->
+            <div id="agent-panel" class="rounded-2xl border p-6 hidden" style="background:var(--bg-card);border-color:var(--border-card);">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(99,102,241,0.08);">
+                        <svg class="w-4 h-4" style="color:#6366f1;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h2 class="text-base font-bold" style="color:var(--text-heading);">Multi-Agent Analysis</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase" style="background:rgba(99,102,241,0.12);color:#6366f1;">3 Agents</span>
+                </div>
+                <div id="agent-cards" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+            </div>
+
+            <!-- Risk Findings -->
             <div class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-5">
@@ -326,9 +421,13 @@
                         </div>
                         <h2 class="text-base font-bold" style="color:var(--text-heading);">Risk & Consistency Findings</h2>
                         <span id="findings-count" class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:rgba(217,119,6,0.12);color:var(--clinical-amber);"></span>
+                        <span id="trust-score" class="items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold" style="display:none;"></span>
                     </div>
                     <!-- Filter tabs (right side) -->
-                    <div id="findings-filter" class="flex gap-1 p-1 rounded-lg" style="background:var(--bg-input);display:inline-flex;"></div>
+                    <div class="flex gap-2 items-center">
+                        <div id="agent-filter" class="flex gap-1 p-1 rounded-lg" style="background:var(--bg-input);display:none;"></div>
+                        <div id="findings-filter" class="flex gap-1 p-1 rounded-lg" style="background:var(--bg-input);display:inline-flex;"></div>
+                    </div>
                 </div>
                 <!-- Findings list -->
                 <div id="result-findings" class="space-y-3 max-h-[40rem] overflow-y-auto pr-2 custom-scrollbar"></div>
@@ -346,7 +445,71 @@
                 <div id="result-completeness" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
             </div>
 
-            <!-- Row 6: Export & Download -->
+            <!-- Row 6: Cross-Document Comparison (single-doc version history) -->
+            <div id="comparison-panel" class="rounded-2xl border p-6 hidden" style="background:var(--bg-card);border-color:var(--border-card);">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(99,102,241,0.08);">
+                        <svg class="w-4 h-4" style="color:#6366f1;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+                    </div>
+                    <h2 class="text-base font-bold" style="color:var(--text-heading);">Cross-Document Comparison</h2>
+                    <span id="comparison-count" class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:rgba(99,102,241,0.12);color:#6366f1;"></span>
+                </div>
+                <!-- Trend Banner -->
+                <div id="comparison-trend" class="mb-4 p-3 rounded-xl hidden" style="border:1px solid var(--border-card);"></div>
+                <!-- Document Comparison Table -->
+                <div id="comparison-table" class="mb-4 overflow-x-auto"></div>
+                <!-- Shared Findings -->
+                <div id="comparison-shared" class="mb-4"></div>
+                <!-- Unique Findings per Document -->
+                <div id="comparison-unique"></div>
+            </div>
+
+        <!-- ═══ MULTI-DOC COMPARISON RESULTS (separate full-page section) ═══ -->
+        <section id="cross-doc-results" class="hidden space-y-6 mb-8">
+            <!-- Risk Score Banner -->
+            <div id="xdoc-risk-banner" class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black" id="xdoc-score-badge" style="background:rgba(99,102,241,0.1);color:#6366f1;">—</div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-bold mb-1" style="color:var(--text-heading);">Cross-Document Comparison Results</h2>
+                        <p id="xdoc-score-label" class="text-sm" style="color:var(--text-muted);">—</p>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="text-center">
+                            <div id="xdoc-doc-count" class="text-2xl font-bold" style="color:var(--text-heading);">0</div>
+                            <div class="text-[10px] uppercase font-semibold" style="color:var(--text-muted);">Documents</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="xdoc-issue-count" class="text-2xl font-bold" style="color:var(--clinical-red);">0</div>
+                            <div class="text-[10px] uppercase font-semibold" style="color:var(--text-muted);">Issues</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Issue severity pills -->
+                <div id="xdoc-severity-pills" class="flex gap-3 mt-4"></div>
+            </div>
+
+            <!-- Per-Document Summaries -->
+            <div id="xdoc-doc-summaries" class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-lg">📋</span>
+                    <h2 class="text-base font-bold" style="color:var(--text-heading);">Document Summaries</h2>
+                </div>
+                <div id="xdoc-summaries-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Pairwise Comparisons -->
+            <div id="xdoc-pairwise" class="space-y-4"></div>
+
+            <!-- Back Button -->
+            <div class="flex justify-center">
+                <button onclick="backToUpload()" class="px-6 py-2.5 border rounded-xl text-sm font-semibold transition hover:opacity-80" style="border-color:var(--border-input);color:var(--text-secondary);">
+                    ← Upload New Documents
+                </button>
+            </div>
+        </section>
+
+            <!-- Row 7: Export & Download -->
             <div class="rounded-2xl border p-6" style="background:var(--bg-card);border-color:var(--border-card);">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">

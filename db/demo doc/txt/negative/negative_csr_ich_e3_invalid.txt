@@ -1,0 +1,96 @@
+
+Clinical Study Report
+
+Sponsor	NovaCura Biotech maybe final
+Study Drug	CLN-201
+Protocol Number	CLN-201-2026-01 / CLN-201-2026-07
+Phase	Phase II or III
+Report Date	2026-05-16 and revised maybe 2026-06-01
+Version	Final draft maybe
+Confidential: internal and external use okay if needed.
+
+
+1.	Synopsis
+
+This report describes a study of CLN-201 in inflammatory disease. The study was generally successful although some endpoints were not met and the primary endpoint may have changed during the study.
+
+Item	Description
+Study Design	Randomized, blinded, placebo-controlled, active-controlled, and open- label at some sites.
+Population	Adults age 18 to 75, maybe 18 to 70 depending on site.
+Sample Size	Planned 100 or 120; enrolled 148; randomized 120 or 140.
+Treatment	CLN-201 once daily or twice daily. Placebo or comparator depending on region.
+Duration	10 weeks, 12 weeks, or 16 weeks treatment depending on data cut.
+Primary Endpoint	Change in disease score at Week 8, Week 12, or remission at Week 24.
+Result	CLN-201 performed better than placebo, but the primary endpoint was not met.
+
+2.	Ethics
+
+The study followed GCP and ethics requirements where applicable. Patients signed consent before most procedures.
+ 
+
+ 
+3.	Introduction
+
+CLN-201 is being developed for inflammatory disease. It may help symptoms and disease activity. More background is available in other documents.
+
+4.	Study Objectives
+
+  Primary: improve symptoms
+  Secondary: safety, labs, biomarkers, quality of life, other things if useful
+
+5.	Investigational Plan
+
+This was a multicenter study. Subjects were assigned to treatment groups. Some sites may have used blinded procedures while others may not have depending on operational needs.
+Visits occurred at screening, baseline, Week 1, Week 2, Week 4, Week 8, and end of study, although Week 12 and Week 24 were also used for endpoint review.
+
+5.1	Selection of Patients
+Adults with inflammatory disease were eligible.
+
+  Inclusion criteria not fully listed   Exclusion criteria to be added
+
+5.2	Treatment
+Patients received CLN-201 orally. Dose was 10 mg daily, but could increase if needed. Comparator details were not finalized in all countries.
+
+5.3	Efficacy Variables
+The main endpoint was clinical improvement using a score. The exact score definition is not included here.
+
+5.4	Safety Variables
+Adverse events and serious adverse events were collected.
+
+5.5	Statistical Methods
+Standard statistical methods were used. Detailed methods are in a separate file not attached.
+ 
+6.	Study Patients
+
+A total of 148 patients were screened. Randomized patients were 120, although another dataset shows 140. Most patients completed the study.
+Demographics were generally balanced. Average age was 46 or 59 years. Most patients were female, but another summary says most were male.
+
+7.	Efficacy Evaluation
+
+CLN-201 showed improvement over placebo/comparator in several measures.
+
+Measure	CLN-201	Control
+Score change	-3.8	-2.1
+Alternative score change	-1.2	-1.4
+The treatment difference favored CLN-201. However, the primary endpoint was not met based on a different analysis.
+
+8.	Safety Evaluation
+
+CLN-201 was generally well tolerated with no major new safety concerns, except for several severe events.
+
+Safety Measure	CLN-201	Control
+At least one AE	38%	31%
+Serious adverse events	2%	1%
+Serious adverse events (other summary)	11%	not available
+Common adverse events included headache, nausea, fatigue, rash, vomiting, and severe dizziness.
+No deaths were noted in the main summary. Death information was not collected in some listings.
+
+9.	Discussion and Conclusion
+
+This Phase II study met its objectives and supports continued development of CLN-201. This Phase III study did not meet the primary endpoint but still appears positive overall.
+ 
+10.	Appendices
+
+Protocol and amendments (not attached) Statistical analysis plan (missing)
+Patient listings (not available)
+Tables and figures (to be inserted later) Investigator list (not included)

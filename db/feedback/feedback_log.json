@@ -50,5 +50,14 @@
     "comment": "not accurate",
     "flagged_entities": [],
     "section_feedback": {}
+  },
+  {
+    "timestamp": "2026-05-16T11:04:56.049867",
+    "document": "sample_protocol.txt",
+    "user_role": "user",
+    "rating": "negative",
+    "comment": "Not looks good",
+    "flagged_entities": [],
+    "section_feedback": {}
   }
 ]

@@ -1,29 +1,7 @@
 {
   "user_id": "3c1f93ba7ebbb0d1",
-  "total_analyses": 25,
+  "total_analyses": 27,
   "history": [
-    {
-      "filename": "sample_protocol.txt",
-      "analyzed_at": "2026-05-16T08:30:45.897909",
-      "doc_type": "protocol",
-      "quality_score": 60.0,
-      "quality_grade": "C",
-      "findings_count": 15,
-      "compliance_pct": 100,
-      "demo_mode": false,
-      "chunks": 3
-    },
-    {
-      "filename": "sample_protocol.txt",
-      "analyzed_at": "2026-05-16T08:37:41.655790",
-      "doc_type": "protocol",
-      "quality_score": 62.0,
-      "quality_grade": "C",
-      "findings_count": 16,
-      "compliance_pct": 100,
-      "demo_mode": false,
-      "chunks": 3
-    },
     {
       "filename": "sample_protocol.txt",
       "analyzed_at": "2026-05-16T08:45:01.888872",
@@ -56,6 +34,28 @@
       "compliance_pct": 100,
       "demo_mode": false,
       "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T11:02:10.425457",
+      "doc_type": "protocol",
+      "quality_score": 62.8,
+      "quality_grade": "C",
+      "findings_count": 15,
+      "compliance_pct": 100,
+      "demo_mode": false,
+      "chunks": 3
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "analyzed_at": "2026-05-16T13:15:34.769939",
+      "doc_type": "protocol",
+      "quality_score": 67.0,
+      "quality_grade": "C",
+      "findings_count": 14,
+      "compliance_pct": 88,
+      "demo_mode": true,
+      "chunks": 3
     }
   ],
   "feedback": [
@@ -76,6 +76,12 @@
       "rating": "negative",
       "comment": "not accurate",
       "submitted_at": "2026-05-16T10:16:41.877154"
+    },
+    {
+      "filename": "sample_protocol.txt",
+      "rating": "negative",
+      "comment": "Not looks good",
+      "submitted_at": "2026-05-16T11:04:56.075841"
     }
   ]
 }
