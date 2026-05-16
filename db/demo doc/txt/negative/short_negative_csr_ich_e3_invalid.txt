@@ -1,0 +1,18 @@
+Clinical Study Report
+
+Sponsor: NovaCura Biotech maybe final
+Study Drug: CLN-201
+Protocol: CLN-201-2026-01 / CLN-201-2026-07
+Phase: Phase II or III
+
+Synopsis: Randomized blinded placebo-controlled, open-label at some sites. Adults 18-75 or 18-70. Planned 100 or 120; enrolled 148; randomized 120 or 140. Duration 10, 12, or 16 weeks. Primary endpoint: score change Week 8, Week 12, or remission Week 24. Result: CLN-201 better than placebo but primary endpoint not met.
+
+Patients: 148 screened, 120 or 140 randomized. Average age 46 or 59 years. Most female, but another summary says most male.
+
+Efficacy: Score change CLN-201 -3.8 vs Control -2.1. Alternative: -1.2 vs -1.4. Primary endpoint not met per different analysis.
+
+Safety: AE rate 38% vs 31%. SAE 2% vs 1%. Other summary: SAE 11% vs not available. No deaths in main summary; death data not collected in some listings.
+
+Conclusion: Phase II met objectives. Phase III did not meet primary endpoint but appears positive.
+
+Appendices: SAP missing. Patient listings not available.

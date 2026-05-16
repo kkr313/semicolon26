@@ -380,6 +380,7 @@ def run_cross_document_comparison(
     # Step 1: Extract structured fields per document
     doc_fields: list[dict] = []
     doc_summaries: list[dict] = []
+    _agg_agents: dict = {}  # accumulate agent results across documents
 
     for doc in documents:
         if use_llm:
@@ -400,8 +401,28 @@ def run_cross_document_comparison(
                 "low": doc.get("risk", {}).get("low_count", 0),
             },
             "extracted_fields": fields,
-            "summary": doc.get("summary", "")[:500],
-        })
+            "summary": doc.get("summary", "")[:500],            # Full detail for per-doc drill-down modal
+            "full_summary": doc.get("summary", ""),
+            "entities": doc.get("entities", {}),
+            "risk_findings": doc.get("risk", {}).get("findings", []),
+            "agent_results": doc.get("risk", {}).get("agent_results", {}),
+            "completeness": doc.get("rule", {}).get("completeness_score", 0),
+            "section_checklist": doc.get("rule", {}).get("section_checklist", {}),        })
+        # Collect per-doc agent results for aggregation
+        doc_agent = doc.get("risk", {}).get("agent_results", {})
+        if doc_agent:
+            for agent_name, agent_info in doc_agent.items():
+                if agent_name not in _agg_agents:
+                    _agg_agents[agent_name] = {
+                        "label": agent_info.get("label", agent_name),
+                        "role": agent_info.get("role", ""),
+                        "confidence_sum": 0.0,
+                        "confidence_n": 0,
+                        "finding_count": 0,
+                    }
+                _agg_agents[agent_name]["confidence_sum"] += agent_info.get("confidence", 0)
+                _agg_agents[agent_name]["confidence_n"] += 1
+                _agg_agents[agent_name]["finding_count"] += agent_info.get("finding_count", 0)
 
     # Step 2: Pairwise cross-document comparison
     all_pairs: list[dict] = []
@@ -444,6 +465,17 @@ def run_cross_document_comparison(
         sev = (iss.get("severity") or "LOW").upper()
         issue_counts[sev] = issue_counts.get(sev, 0) + 1
 
+    # Aggregate agent results across all documents
+    agent_results = {}
+    for aname, ainfo in _agg_agents.items():
+        n = ainfo["confidence_n"] or 1
+        agent_results[aname] = {
+            "label": ainfo["label"],
+            "role": ainfo["role"],
+            "confidence": round(ainfo["confidence_sum"] / n, 2),
+            "finding_count": ainfo["finding_count"],
+        }
+
     return {
         "document_count": len(documents),
         "documents": doc_summaries,
@@ -451,4 +483,5 @@ def run_cross_document_comparison(
         "total_issues": len(all_issues),
         "issue_counts": issue_counts,
         "risk_score": risk_score,
+        "agent_results": agent_results,
     }

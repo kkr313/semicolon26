@@ -1,0 +1,19 @@
+Clinical Protocol
+
+Protocol Title: Study of CLN-201 in inflammatory condition maybe final
+Protocol Number: CLN-201-2026-01 / CLN-201-2026-07
+Sponsor: NovaCura Biotech or NovaCura Bio
+Phase: Phase II or III
+
+Summary: Randomized blind placebo study, maybe open-label. Adults 18-70 or 75. Sample size 100 or 120. CLN-201 10 mg daily, maybe twice daily. Control not finalized. Duration 10 or 12 weeks. Primary endpoint: score change at Week 8, maybe Week 12.
+
+Objectives: Primary: improve symptoms. Endpoint defined elsewhere.
+
+Inclusion: Adults with inflammatory disease. Stable meds maybe 4 weeks.
+Exclusion: Infection. Pregnant. Other exclusions to be added.
+
+Treatment: CLN-201. Comparator not finalized. Dose may increase.
+
+Statistics: Methods will be standard. Sample size justification not completed.
+
+Ethics: Consent should be obtained before most study procedures.

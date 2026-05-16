@@ -59,5 +59,23 @@
     "comment": "Not looks good",
     "flagged_entities": [],
     "section_feedback": {}
+  },
+  {
+    "timestamp": "2026-05-16T17:26:17.325703",
+    "document": "unknown",
+    "user_role": "user",
+    "rating": "negative",
+    "comment": "",
+    "flagged_entities": [],
+    "section_feedback": {}
+  },
+  {
+    "timestamp": "2026-05-16T17:31:05.661985",
+    "document": "negative_csr_ich_e3_invalid.txt, negative_informed_consent_ich_gcp_4_8_invalid.txt, negative_protocol_ich_m11_invalid.txt",
+    "user_role": "user",
+    "rating": "negative",
+    "comment": "not ok, please review more.",
+    "flagged_entities": [],
+    "section_feedback": {}
   }
 ]

@@ -1,10 +1,110 @@
 [
   {
-    "filename": "sample_protocol.txt",
+    "filename": "negative_informed_consent_ich_gcp_4_8_invalid.txt",
+    "doc_type": "clinical_document",
+    "doc_type_label": "Clinical Document",
+    "analyzed_at": "2026-05-16T17:40:53.304499",
+    "quality_score": 35.5,
+    "quality_grade": "D",
+    "findings": [
+      {
+        "title": "Missing Rescue Medication Criteria",
+        "severity": "HIGH",
+        "category": "rescue_criteria",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "DSMB Charter Not Referenced",
+        "severity": "HIGH",
+        "category": "dsmb_oversight",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Sample Size Justification Incomplete",
+        "severity": "HIGH",
+        "category": "sample_size",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "No Multiplicity Adjustment for Secondary Endpoints",
+        "severity": "MEDIUM",
+        "category": "multiplicity",
+        "agent": "statistics",
+        "verified": "partial"
+      },
+      {
+        "title": "Missing Data Handling Not Specified",
+        "severity": "MEDIUM",
+        "category": "missing_data",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Concomitant Medication Washout Unclear",
+        "severity": "MEDIUM",
+        "category": "safety_monitoring",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Investigator Qualifications Missing (ICH M11 Section 14)",
+        "severity": "MEDIUM",
+        "category": "ich_gcp_structure",
+        "agent": "regulatory",
+        "verified": "partial"
+      },
+      {
+        "title": "Protocol Deviation Handling Not Defined",
+        "severity": "MEDIUM",
+        "category": "deviation_handling",
+        "agent": "regulatory",
+        "verified": "unverified"
+      },
+      {
+        "title": "Missing Patient Reported Outcomes",
+        "severity": "LOW",
+        "category": "endpoint_definition",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Record Retention Period Not Specified",
+        "severity": "LOW",
+        "category": "data_integrity",
+        "agent": "regulatory",
+        "verified": "partial"
+      }
+    ],
+    "finding_counts": {
+      "total": 10,
+      "high": 3,
+      "medium": 5,
+      "low": 2
+    },
+    "trust_score": 75,
+    "compliance_pct": 33,
+    "entities": {
+      "study_phase": "Phase III",
+      "sample_size": "500 patients (250 per arm)",
+      "drugs": [
+        "Metformin XR",
+        "Placebo"
+      ],
+      "primary_endpoints": [
+        "Change from baseline in HbA1c at Week 24",
+        "Proportion of patients achieving HbA1c < 7.0% at Week 24"
+      ]
+    }
+  },
+  {
+    "filename": "negative_protocol_ich_m11_invalid.txt",
     "doc_type": "protocol",
     "doc_type_label": "Clinical Protocol",
-    "analyzed_at": "2026-05-16T13:15:34.752458",
-    "quality_score": 67.0,
+    "analyzed_at": "2026-05-16T17:51:22.324720",
+    "quality_score": 62.0,
     "quality_grade": "C",
     "findings": [
       {
@@ -50,7 +150,7 @@
         "verified": "verified"
       },
       {
-        "title": "Investigator Qualifications Missing (ICH M11 \u00a714)",
+        "title": "Investigator Qualifications Missing (ICH M11 Section 14)",
         "severity": "MEDIUM",
         "category": "ich_gcp_structure",
         "agent": "regulatory",
@@ -85,7 +185,307 @@
       "low": 2
     },
     "trust_score": 75,
-    "compliance_pct": 88,
+    "compliance_pct": 81,
+    "entities": {
+      "study_phase": "Phase III",
+      "sample_size": "500 patients (250 per arm)",
+      "drugs": [
+        "Metformin XR",
+        "Placebo"
+      ],
+      "primary_endpoints": [
+        "Change from baseline in HbA1c at Week 24",
+        "Proportion of patients achieving HbA1c < 7.0% at Week 24"
+      ]
+    }
+  },
+  {
+    "filename": "short_negative_informed_consent_ich_gcp_4_8_invalid.txt",
+    "doc_type": "clinical_document",
+    "doc_type_label": "Clinical Document",
+    "analyzed_at": "2026-05-16T17:52:17.759282",
+    "quality_score": 46.8,
+    "quality_grade": "D",
+    "findings": [
+      {
+        "title": "Missing Rescue Medication Criteria",
+        "severity": "HIGH",
+        "category": "rescue_criteria",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "DSMB Charter Not Referenced",
+        "severity": "HIGH",
+        "category": "dsmb_oversight",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Sample Size Justification Incomplete",
+        "severity": "HIGH",
+        "category": "sample_size",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "No Multiplicity Adjustment for Secondary Endpoints",
+        "severity": "MEDIUM",
+        "category": "multiplicity",
+        "agent": "statistics",
+        "verified": "partial"
+      },
+      {
+        "title": "Missing Data Handling Not Specified",
+        "severity": "MEDIUM",
+        "category": "missing_data",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Concomitant Medication Washout Unclear",
+        "severity": "MEDIUM",
+        "category": "safety_monitoring",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Investigator Qualifications Missing (ICH M11 Section 14)",
+        "severity": "MEDIUM",
+        "category": "ich_gcp_structure",
+        "agent": "regulatory",
+        "verified": "partial"
+      },
+      {
+        "title": "Protocol Deviation Handling Not Defined",
+        "severity": "MEDIUM",
+        "category": "deviation_handling",
+        "agent": "regulatory",
+        "verified": "unverified"
+      },
+      {
+        "title": "Missing Patient Reported Outcomes",
+        "severity": "LOW",
+        "category": "endpoint_definition",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Record Retention Period Not Specified",
+        "severity": "LOW",
+        "category": "data_integrity",
+        "agent": "regulatory",
+        "verified": "partial"
+      }
+    ],
+    "finding_counts": {
+      "total": 10,
+      "high": 3,
+      "medium": 5,
+      "low": 2
+    },
+    "trust_score": 75,
+    "compliance_pct": 50,
+    "entities": {
+      "study_phase": "Phase III",
+      "sample_size": "500 patients (250 per arm)",
+      "drugs": [
+        "Metformin XR",
+        "Placebo"
+      ],
+      "primary_endpoints": [
+        "Change from baseline in HbA1c at Week 24",
+        "Proportion of patients achieving HbA1c < 7.0% at Week 24"
+      ]
+    }
+  },
+  {
+    "filename": "negative_csr_ich_e3_invalid.txt",
+    "doc_type": "protocol",
+    "doc_type_label": "Clinical Protocol",
+    "analyzed_at": "2026-05-16T18:07:43.938122",
+    "quality_score": 50.4,
+    "quality_grade": "D",
+    "findings": [
+      {
+        "title": "Missing Rescue Medication Criteria",
+        "severity": "HIGH",
+        "category": "rescue_criteria",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "DSMB Charter Not Referenced",
+        "severity": "HIGH",
+        "category": "dsmb_oversight",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Sample Size Justification Incomplete",
+        "severity": "HIGH",
+        "category": "sample_size",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "No Multiplicity Adjustment for Secondary Endpoints",
+        "severity": "MEDIUM",
+        "category": "multiplicity",
+        "agent": "statistics",
+        "verified": "partial"
+      },
+      {
+        "title": "Missing Data Handling Not Specified",
+        "severity": "MEDIUM",
+        "category": "missing_data",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Concomitant Medication Washout Unclear",
+        "severity": "MEDIUM",
+        "category": "safety_monitoring",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Investigator Qualifications Missing (ICH M11 Section 14)",
+        "severity": "MEDIUM",
+        "category": "ich_gcp_structure",
+        "agent": "regulatory",
+        "verified": "partial"
+      },
+      {
+        "title": "Protocol Deviation Handling Not Defined",
+        "severity": "MEDIUM",
+        "category": "deviation_handling",
+        "agent": "regulatory",
+        "verified": "unverified"
+      },
+      {
+        "title": "Missing Patient Reported Outcomes",
+        "severity": "LOW",
+        "category": "endpoint_definition",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Record Retention Period Not Specified",
+        "severity": "LOW",
+        "category": "data_integrity",
+        "agent": "regulatory",
+        "verified": "partial"
+      }
+    ],
+    "finding_counts": {
+      "total": 10,
+      "high": 3,
+      "medium": 5,
+      "low": 2
+    },
+    "trust_score": 75,
+    "compliance_pct": 69,
+    "entities": {
+      "study_phase": "Phase III",
+      "sample_size": "500 patients (250 per arm)",
+      "drugs": [
+        "Metformin XR",
+        "Placebo"
+      ],
+      "primary_endpoints": [
+        "Change from baseline in HbA1c at Week 24",
+        "Proportion of patients achieving HbA1c < 7.0% at Week 24"
+      ]
+    }
+  },
+  {
+    "filename": "negative_informed_consent_ich_gcp_4_8_invalid.txt",
+    "doc_type": "clinical_document",
+    "doc_type_label": "Clinical Document",
+    "analyzed_at": "2026-05-16T18:24:58.142872",
+    "quality_score": 35.5,
+    "quality_grade": "D",
+    "findings": [
+      {
+        "title": "Missing Rescue Medication Criteria",
+        "severity": "HIGH",
+        "category": "rescue_criteria",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "DSMB Charter Not Referenced",
+        "severity": "HIGH",
+        "category": "dsmb_oversight",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Sample Size Justification Incomplete",
+        "severity": "HIGH",
+        "category": "sample_size",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "No Multiplicity Adjustment for Secondary Endpoints",
+        "severity": "MEDIUM",
+        "category": "multiplicity",
+        "agent": "statistics",
+        "verified": "partial"
+      },
+      {
+        "title": "Missing Data Handling Not Specified",
+        "severity": "MEDIUM",
+        "category": "missing_data",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Concomitant Medication Washout Unclear",
+        "severity": "MEDIUM",
+        "category": "safety_monitoring",
+        "agent": "safety",
+        "verified": "verified"
+      },
+      {
+        "title": "Investigator Qualifications Missing (ICH M11 Section 14)",
+        "severity": "MEDIUM",
+        "category": "ich_gcp_structure",
+        "agent": "regulatory",
+        "verified": "partial"
+      },
+      {
+        "title": "Protocol Deviation Handling Not Defined",
+        "severity": "MEDIUM",
+        "category": "deviation_handling",
+        "agent": "regulatory",
+        "verified": "unverified"
+      },
+      {
+        "title": "Missing Patient Reported Outcomes",
+        "severity": "LOW",
+        "category": "endpoint_definition",
+        "agent": "statistics",
+        "verified": "verified"
+      },
+      {
+        "title": "Record Retention Period Not Specified",
+        "severity": "LOW",
+        "category": "data_integrity",
+        "agent": "regulatory",
+        "verified": "partial"
+      }
+    ],
+    "finding_counts": {
+      "total": 10,
+      "high": 3,
+      "medium": 5,
+      "low": 2
+    },
+    "trust_score": 75,
+    "compliance_pct": 33,
     "entities": {
       "study_phase": "Phase III",
       "sample_size": "500 patients (250 per arm)",

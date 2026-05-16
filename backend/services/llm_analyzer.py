@@ -487,29 +487,82 @@ _DOC_TYPE_LABELS = {
 
 
 def detect_document_type(text: str) -> str:
-    """Detect if the document is a protocol, CSR, consent form, or generic clinical doc."""
-    text_lower = text[:3000].lower()
+    """Detect if the document is a protocol, CSR, consent form, or generic clinical doc.
 
-    consent_keywords = ["informed consent", "consent form", "i voluntarily agree",
-                        "authorization to participate", "withdrawal from study",
-                        "i have read and understand"]
-    protocol_keywords = ["study protocol", "protocol number", "study objectives",
-                         "inclusion criteria", "exclusion criteria", "primary endpoint"]
-    csr_keywords = ["clinical study report", "study results", "efficacy analysis",
-                    "safety analysis", "statistical analysis results"]
+    Uses weighted keyword matching across the full text (up to 10 000 chars).
+    Strong signals (document headers/titles) count 3 points; regular keywords
+    count 1 point.  A single strong match is enough to classify.
+    """
+    text_lower = text[:10000].lower()
 
-    consent_score = sum(1 for kw in consent_keywords if kw in text_lower)
-    protocol_score = sum(1 for kw in protocol_keywords if kw in text_lower)
-    csr_score = sum(1 for kw in csr_keywords if kw in text_lower)
+    # ── Strong signals — typically appear in the title / header ──────────
+    consent_strong = [
+        "informed consent", "consent form", "consent document",
+        "i voluntarily agree", "authorization to participate",
+        "i have read and understand", "by signing you agree",
+    ]
+    protocol_strong = [
+        "study protocol", "clinical protocol",
+        "protocol title", "investigational plan",
+    ]
+    csr_strong = [
+        "clinical study report", "study report",
+        "statistical analysis results", "efficacy analysis",
+    ]
 
-    if consent_score >= 2 and consent_score > protocol_score:
-        return "consent_form"
-    elif csr_score >= 2 and csr_score > protocol_score:
-        return "csr"
-    elif protocol_score >= 2:
-        return "protocol"
-    else:
-        return "clinical_document"
+    # ── Weak signals — supporting keywords (1 pt each) ──────────────────
+    consent_weak = [
+        "withdrawal from study", "you are asked to join",
+        "voluntary", "risks:", "benefits:", "payment:",
+        "you can stop", "sign:", "your information will be protected",
+        "participation is voluntary", "right to withdraw",
+    ]
+    protocol_weak = [
+        "study objectives", "inclusion criteria", "exclusion criteria",
+        "primary endpoint", "study design", "randomized",
+        "sample size", "treatment arms", "dose escalation",
+        "eligibility", "investigational product", "study population",
+        "statistical methods", "ethics:", "comparator",
+    ]
+    csr_weak = [
+        "safety analysis", "study results", "efficacy results",
+        "adverse events", "disposition of patients", "patient listings",
+        "appendices:", "synopsis:", "patients:", "enrolled",
+        "primary endpoint not met", "primary endpoint met",
+        "sae ", "ae rate", "conclusion:", "report date",
+        "screened", "randomized", "efficacy:", "safety:",
+        "patient demographics", "this report", "results:",
+        "investigational plan",
+    ]
+
+    def _score(strong_kws, weak_kws):
+        s = sum(3 for kw in strong_kws if kw in text_lower)
+        s += sum(1 for kw in weak_kws if kw in text_lower)
+        return s
+
+    consent_score = _score(consent_strong, consent_weak)
+    protocol_score = _score(protocol_strong, protocol_weak)
+    csr_score = _score(csr_strong, csr_weak)
+
+    # ── Disambiguation: CSRs naturally reference protocol terms ──────────
+    # If a strong CSR header is detected, demote protocol score because
+    # keywords like "inclusion criteria", "study design", "sample size"
+    # appear in CSRs as background context, not as the primary purpose.
+    has_csr_header = any(kw in text_lower for kw in ["clinical study report", "study report"])
+    has_protocol_header = any(kw in text_lower for kw in ["study protocol", "clinical protocol", "protocol title"])
+    if has_csr_header and not has_protocol_header:
+        protocol_score = protocol_score // 2
+
+    # Pick the highest-scoring type; require at least 1 point
+    scores = {
+        "consent_form": consent_score,
+        "protocol": protocol_score,
+        "csr": csr_score,
+    }
+    best = max(scores, key=scores.get)
+    if scores[best] >= 1:
+        return best
+    return "clinical_document"
 
 
 def get_doc_type_label(doc_type: str) -> str:

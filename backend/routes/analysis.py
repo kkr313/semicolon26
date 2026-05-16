@@ -301,30 +301,19 @@ async def compare_documents(
     else:
         use_demo = demo_mode.lower() == "true"
 
-    if len(files) < 2:
-        raise HTTPException(status_code=400, detail="Upload at least 2 documents to compare.")
-    if len(files) > 5:
-        raise HTTPException(status_code=400, detail="Maximum 5 documents at once.")
+    if len(files) != 3:
+        raise HTTPException(status_code=400, detail="Please upload exactly 3 documents: Protocol, CSR, and Consent Form.")
 
-    # In demo mode, return pre-built comparison
-    if use_demo:
-        return {"success": True, "demo_mode": True, **DEMO_CROSS_DOC_COMPARISON}
+    _DOC_TYPE_LABELS_MAP = {
+        "protocol": "Protocol",
+        "csr": "CSR (Clinical Study Report)",
+        "consent_form": "Consent Form",
+    }
+    _REQUIRED_TYPES = {"protocol", "csr", "consent_form"}
 
-    # Live mode: parse + analyse each document, then compare
+    # ══ Phase 1: Parse + validate ALL files (runs in both demo & live) ════
     tmp_paths = []
-    doc_results = []
-    loop = asyncio.get_event_loop()
-    executor = ThreadPoolExecutor(max_workers=1)
-
-    async def _run_or_cancel(func, *a, **kw):
-        task = loop.run_in_executor(executor, lambda: func(*a, **kw))
-        while not task.done():
-            if await request.is_disconnected():
-                task.cancel()
-                raise HTTPException(status_code=499, detail="Client disconnected")
-            await asyncio.sleep(0.5)
-        return task.result()
-
+    parsed_docs = []
     try:
         for uploaded in files:
             suffix = Path(uploaded.filename).suffix.lower()
@@ -333,6 +322,8 @@ async def compare_documents(
 
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
                 content = await uploaded.read()
+                if len(content) == 0:
+                    raise HTTPException(status_code=422, detail=f"{uploaded.filename}: File is empty (0 bytes).")
                 tmp.write(content)
                 tmp_paths.append(tmp.name)
 
@@ -341,24 +332,98 @@ async def compare_documents(
             if parsed.get("error"):
                 raise HTTPException(status_code=422, detail=f"{uploaded.filename}: {parsed['error']}")
 
-            clinical_check = is_clinical_document(parsed["text"])
+            text = parsed["text"]
+            if len(text.strip()) < 200:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"{uploaded.filename}: Document content is too short for meaningful analysis. Please upload a complete clinical document.",
+                )
+
+            clinical_check = is_clinical_document(text)
             if not clinical_check["is_clinical"]:
                 raise HTTPException(status_code=422, detail=f"{uploaded.filename}: {clinical_check['message']}")
 
-            chunks = chunk_text(parsed["text"])
-            doc_type = detect_document_type(parsed["text"])
+            doc_type = detect_document_type(text)
+            chunks = chunk_text(text)
+
+            parsed_docs.append({
+                "filename": parsed["filename"],
+                "text": text,
+                "chunks": chunks,
+                "doc_type": doc_type,
+            })
+
+        # ── Validate: all 3 required document types present ──────────────
+        detected_types = {}  # doc_type -> filename
+        for pd in parsed_docs:
+            dt = pd["doc_type"]
+            if dt == "clinical_document":
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"\"{pd['filename']}\" could not be identified as a Protocol, CSR, or Consent Form. "
+                        f"Please ensure the document contains clear clinical content "
+                        f"(e.g. 'Clinical Study Report', 'Study Protocol', 'Informed Consent')."
+                    ),
+                )
+            if dt in detected_types:
+                label = _DOC_TYPE_LABELS_MAP.get(dt, dt)
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"Duplicate document type detected: both \"{detected_types[dt]}\" and "
+                        f"\"{pd['filename']}\" are identified as {label}. "
+                        f"Please upload one of each type: Protocol, CSR, and Consent Form."
+                    ),
+                )
+            detected_types[dt] = pd["filename"]
+
+        missing_types = _REQUIRED_TYPES - set(detected_types.keys())
+        if missing_types:
+            missing_labels = [_DOC_TYPE_LABELS_MAP.get(t, t) for t in sorted(missing_types)]
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Missing required document type(s): {', '.join(missing_labels)}. "
+                    f"Detected: {', '.join(_DOC_TYPE_LABELS_MAP.get(t, t) + ' (' + f + ')' for t, f in detected_types.items())}. "
+                    f"Please upload all 3: Protocol, CSR, and Consent Form."
+                ),
+            )
+
+        # ══ Demo mode: validation passed → return pre-built data ══════════
+        if use_demo:
+            return {"success": True, "demo_mode": True, **DEMO_CROSS_DOC_COMPARISON}
+
+        # ══ Phase 2: Live LLM analysis (only after all validations pass) ══
+        doc_results = []
+        reset_token_usage()
+        loop = asyncio.get_event_loop()
+        executor = ThreadPoolExecutor(max_workers=1)
+
+        async def _run_or_cancel(func, *a, **kw):
+            task = loop.run_in_executor(executor, lambda: func(*a, **kw))
+            while not task.done():
+                if await request.is_disconnected():
+                    task.cancel()
+                    raise HTTPException(status_code=499, detail="Client disconnected")
+                await asyncio.sleep(0.5)
+            return task.result()
+
+        for pd in parsed_docs:
+            chunks = pd["chunks"]
+            doc_type = pd["doc_type"]
+            filename = pd["filename"]
 
             try:
-                reset_token_usage()
                 summary = await _run_or_cancel(summarize_document, chunks, model=model)
                 entities = await _run_or_cancel(extract_entities, chunks, model=model)
                 risk = await _run_or_cancel(run_all_agents, chunks, model=model, doc_type=doc_type)
             except HTTPException:
                 raise
             except Exception as exc:
-                raise HTTPException(status_code=500, detail=f"LLM analysis failed for {uploaded.filename}: {exc}")
+                raise HTTPException(status_code=500, detail=f"LLM analysis failed for {filename}: {exc}")
 
-            rule_results = run_rule_based_checks(parsed["text"], entities, doc_type=doc_type)
+            rule_results = run_rule_based_checks(pd["text"], entities, doc_type=doc_type)
             quality = calculate_quality_score(
                 rule_results["completeness_score"],
                 risk.get("findings", []),
@@ -366,10 +431,10 @@ async def compare_documents(
             )
 
             doc_results.append({
-                "filename": parsed["filename"],
+                "filename": filename,
                 "doc_type": doc_type,
                 "doc_type_label": get_doc_type_label(doc_type),
-                "text": parsed["text"],
+                "text": pd["text"],
                 "entities": entities,
                 "summary": summary,
                 "risk": risk,
@@ -382,6 +447,7 @@ async def compare_documents(
             comparison = run_cross_document_comparison(doc_results, use_llm=True, model=model)
         except Exception as exc:
             comparison = run_cross_document_comparison(doc_results, use_llm=False)
+        comparison["token_usage"] = get_token_usage()
         return {"success": True, "demo_mode": False, **comparison}
 
     finally:
